@@ -167,7 +167,6 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.iceservers", iceServers );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.useipv6", Boolean.toString( useIPv6 ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.usenicks", Boolean.toString( useNicks ) );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.resolution", resolution );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.audio.bandwidth", audiobandwidth );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.video.bandwidth", videobandwidth );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", Boolean.toString( audiomixer ) );
@@ -179,6 +178,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", focusjid );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", focuspassword );
 
+            ofmeetConfig.setResolution( Integer.parseInt( resolution ) );
             ofmeetConfig.setLocalNATAddress( localAddress );
             ofmeetConfig.setPublicNATAddress( publicAddress );
             ofmeetConfig.setChannelLastN( channelLastN );
@@ -274,7 +274,7 @@
             </tr>
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.resolution"/>:</td>
-                <td><input type="text" size="10" maxlength="100" name="resolution" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.resolution", 360)}"></td>
+                <td><input type="text" size="10" maxlength="100" name="resolution" value="${ofmeetConfig.resolution}"></td>
             </tr>
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.audio.bandwidth"/>:</td>

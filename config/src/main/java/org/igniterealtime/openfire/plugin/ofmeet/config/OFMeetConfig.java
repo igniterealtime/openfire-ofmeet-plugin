@@ -275,4 +275,19 @@ public class OFMeetConfig
     {
         JiveGlobals.deleteProperty( "org.ice4j.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES" );
     }
+
+    public void setResolution( int resolution )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.resolution", Integer.toString( resolution ) );
+    }
+
+    public int getResolution()
+    {
+        return JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.resolution", 720 );
+    }
+
+    public void resetResolution()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.resolution" );
+    }
 }
