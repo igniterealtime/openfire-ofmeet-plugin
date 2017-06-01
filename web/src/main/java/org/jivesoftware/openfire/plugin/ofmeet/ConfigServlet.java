@@ -39,9 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -260,10 +258,10 @@ public class ConfigServlet extends HttpServlet
      * (https, wss) over plain ones (http, ws), and to determine what the server address and port is.
      *
      * @param request the request to this servlet.
-     * @return An URL (never null).
-     * @throws MalformedURLException When an URL could not be constructed.
+     * @return An URI (never null).
+     * @throws URISyntaxException When an URI could not be constructed.
      */
-    public static URL getMostPreferredConnectionURL( HttpServletRequest request ) throws MalformedURLException
+    public static URI getMostPreferredConnectionURL( HttpServletRequest request ) throws URISyntaxException
     {
         Log.debug( "[{}] Generating BOSH URL based on {}", request.getRemoteAddr(), request.getRequestURL() );
         if ( XMPPServer.getInstance().getPluginManager().getPlugin( "websocket" ) != null )
@@ -279,12 +277,12 @@ public class ConfigServlet extends HttpServlet
                 websocketScheme = "ws";
             }
 
-            return new URL( websocketScheme, request.getServerName(), request.getServerPort(), "/ws/" );
+            return new URI( websocketScheme, null, request.getServerName(), request.getServerPort(), "/ws", null, null);
         }
         else
         {
             Log.debug( "[{}] No Websocket plugin available. Returning an HTTP-BIND address.", request.getRemoteAddr() );
-            return new URL( request.getScheme(), request.getServerName(), request.getServerPort(), "/http-bind/" );
+            return new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null);
         }
     }
 }
