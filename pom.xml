@@ -65,6 +65,13 @@
             <organization>Ignite Realtime</organization>
             <organizationUrl>https://www.igniterealtime.org</organizationUrl>
         </developer>
+        <developer>
+            <id>deleolajide</id>
+            <name>Dele Olajide</name>
+            <email>dele@4ng.net</email>
+            <organization>Ignite Realtime</organization>
+            <organizationUrl>https://www.igniterealtime.org</organizationUrl>
+        </developer>        
     </developers>
 
     <build>
