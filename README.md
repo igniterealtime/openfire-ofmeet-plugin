@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/igniterealtime/ofmeet-openfire-plugin.svg?branch=master)](https://travis-ci.org/igniterealtime/ofmeet-openfire-plugin)
+
 OFMeet project
 ==============
 
