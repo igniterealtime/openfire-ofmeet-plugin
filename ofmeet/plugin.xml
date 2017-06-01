@@ -2,10 +2,10 @@
 
 <plugin>
     <class>org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin</class>
-    <name>Openfire Meetings</name>
-    <description>Provides high quality, scalable video conferences using Jitsi Videobridge</description>
+    <name>${project.name}</name>
+    <description>${project.description}</description>
     <author>Ignite Realtime</author>
-    <version>0.4.10 Alpha</version>
+    <version>${project.version}</version>
     <date>05/23/2017</date>
     <minServerVersion>4.2.0 Alpha</minServerVersion>
     <adminconsole>
