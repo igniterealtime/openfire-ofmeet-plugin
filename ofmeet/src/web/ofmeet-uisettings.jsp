@@ -83,6 +83,7 @@
 
         final boolean showPoweredBy = ParamUtils.getBooleanParameter( request, "showPoweredBy" );
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
+        final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
 
         final boolean showWatermark = ParamUtils.getBooleanParameter( request, "showWatermark" );
         final String watermarkLogoUrlValue = request.getParameter( "watermarkLogoUrl" );
@@ -154,6 +155,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", Boolean.toString( brandShowWatermark ) );
 
+            ofmeetConfig.setLipSync( lipSync );
             ofmeetConfig.setWatermarkLogoUrl( watermarkLogoUrl );
             ofmeetConfig.setBrandWatermarkLogoUrl( brandWatermarkLogoUrl );
 
@@ -250,6 +252,12 @@
                 <td nowrap colspan="2">
                     <input type="checkbox" name="randomRoomNames" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", true) ? "checked" : ""}>
                     <fmt:message key="ofmeet.random.roomnames.enabled" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="lipSync" ${ofmeetConfig.lipSync ? "checked" : ""}>
+                    <fmt:message key="ofmeet.lipSync.enabled" />
                 </td>
             </tr>
 		</table>

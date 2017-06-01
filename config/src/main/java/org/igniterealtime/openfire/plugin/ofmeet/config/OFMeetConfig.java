@@ -290,4 +290,19 @@ public class OFMeetConfig
     {
         JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.resolution" );
     }
+
+    public void setLipSync( boolean lipSync )
+    {
+        JiveGlobals.setProperty( "ofmeet.lipSync.enabled", Boolean.toString( lipSync ) );
+    }
+
+    public boolean getLipSync()
+    {
+        return JiveGlobals.getBooleanProperty( "ofmeet.lipSync.enabled", false ); // defaults to false, known to cause client reconnects in Chrome 58.
+    }
+
+    public void resetLipSync()
+    {
+        JiveGlobals.deleteProperty( "ofmeet.lipSync.enabled" );
+    }
 }

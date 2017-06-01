@@ -142,6 +142,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "useBundle", useBundle );
             config.put( "enableWelcomePage", enableWelcomePage );
             config.put( "enableRtpStats", enableRtpStats );
+            config.put( "enableLipSync", ofMeetConfig.getLipSync() );
             config.put( "openSctp", openSctp );
 
             if ( recordingKey == null || recordingKey.isEmpty() )
