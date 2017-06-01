@@ -1,4 +1,4 @@
-+[![Build Status](https://travis-ci.org/igniterealtime/ofmeet-openfire-plugin.svg?branch=master)](https://travis-ci.org/igniterealtime/ofmeet-openfire-plugin)
+[![Build Status](https://travis-ci.org/igniterealtime/ofmeet-openfire-plugin.svg?branch=master)](https://travis-ci.org/igniterealtime/ofmeet-openfire-plugin)
 
 Openfire Meetings project
 =========================
