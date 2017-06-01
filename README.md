@@ -1,5 +1,7 @@
-OFMeet project
-==============
++[![Build Status](https://travis-ci.org/igniterealtime/ofmeet-openfire-plugin.svg?branch=master)](https://travis-ci.org/igniterealtime/ofmeet-openfire-plugin)
+
+Openfire Meetings project
+=========================
 
 This project produces two Openfire plugins, offocus and ofmeet, that, combined, provide a WebRTC-based video conference solution for Openfire.
 
