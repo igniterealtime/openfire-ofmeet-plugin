@@ -17,6 +17,7 @@
 package org.igniterealtime.openfire.plugin.ofmeet.config;
 
 import org.jivesoftware.util.JiveGlobals;
+import org.xmpp.packet.JID;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -304,5 +305,54 @@ public class OFMeetConfig
     public void resetLipSync()
     {
         JiveGlobals.deleteProperty( "ofmeet.lipSync.enabled" );
+    }
+
+    public void setFocusUser( JID jid )
+    {
+        if ( jid == null )
+        {
+            JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid" );
+        }
+        else
+        {
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", jid.toBareJID() );
+        }
+    }
+
+    public JID getFocusUser()
+    {
+        final String value = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid" );
+        if ( value != null )
+        {
+            try
+            {
+                return new JID( value ).asBareJID();
+            }
+            catch ( RuntimeException e )
+            {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public void resetFocusUser()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid" );
+    }
+
+    public void setFocusPassword( String password )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", password );
+    }
+
+    public String getFocusPassword()
+    {
+        return JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.password" );
+    }
+
+    public void resetFocusPassword()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.focus.user.password" );
     }
 }

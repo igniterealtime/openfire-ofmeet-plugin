@@ -16,13 +16,19 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
+import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.jicofo.FocusManager;
 import org.jitsi.jicofo.auth.AuthenticationAuthority;
 import org.jitsi.jicofo.reservation.ReservationSystem;
+import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.user.User;
+import org.jivesoftware.openfire.user.UserManager;
+import org.jivesoftware.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmpp.packet.JID;
 
 import java.io.File;
 
@@ -39,6 +45,7 @@ public class FocusPlugin implements Plugin
     @Override
     public void initializePlugin( PluginManager pluginManager, File file )
     {
+        ensureFocusUser();
         try
         {
             jitsiJicofoWrapper.initialize();
@@ -46,6 +53,48 @@ public class FocusPlugin implements Plugin
         catch ( Exception e )
         {
             Log.error( "An exception occurred while initializing the Jitsi Jicofo wrapper.", e );
+        }
+    }
+
+    private void ensureFocusUser()
+    {
+        final OFMeetConfig config = new OFMeetConfig();
+
+        JID focusJID = config.getFocusUser();
+        if ( config.getFocusUser() == null )
+        {
+            final String username = "focus-" + StringUtils.randomString( 4 );
+            focusJID = XMPPServer.getInstance().createJID( username, "ignored" ).asBareJID();
+        }
+
+        String password = config.getFocusPassword();
+        if ( password == null || password.isEmpty() )
+        {
+            password = StringUtils.randomString( 40 );
+        }
+
+        if ( XMPPServer.getInstance().isLocal( focusJID ) )
+        {
+            final UserManager userManager = XMPPServer.getInstance().getUserManager();
+            if ( !userManager.isRegisteredUser( focusJID ) )
+            {
+                Log.info( "No pre-existing 'focus' user detected. Generating one." );
+                try
+                {
+                    userManager.createUser(
+                            focusJID.getNode(),
+                            password,
+                            "Focus User (generated)",
+                            null
+                    );
+                    config.setFocusUser( focusJID );
+                    config.setFocusPassword( password );
+                }
+                catch ( Exception e )
+                {
+                    Log.error( "Unable to provision a 'focus' user.", e );
+                }
+            }
         }
     }
 

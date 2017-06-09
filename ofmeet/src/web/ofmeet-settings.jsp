@@ -23,6 +23,7 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="org.jivesoftware.util.*" %>
 <%@ page import="java.net.UnknownHostException" %>
+<%@ page import="org.xmpp.packet.JID" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -138,7 +139,19 @@
         final String clientpassword = request.getParameter( "clientpassword" );
         final String enableSip = request.getParameter( "enableSip" );
         final boolean allowdirectsip = ParamUtils.getBooleanParameter( request, "allowdirectsip" );
-        final String focusjid = request.getParameter( "focusjid" );
+
+        JID focusJID = null;
+        final String focusValue = request.getParameter( "focusjid" );
+        try {
+            if ( focusValue.contains( "@" ) ) {
+                focusJID = new JID( focusValue ).asBareJID();
+            } else {
+                focusJID = XMPPServer.getInstance().createJID( focusValue, "ignored" ).asBareJID();
+            }
+        } catch ( RuntimeException e ) {
+            errors.put( "focusjid", "Unable to parse value as JID" );
+        }
+
         final String focuspassword = request.getParameter( "focuspassword" );
         final String hqVoice = request.getParameter( "hqVoice" );
         final boolean globalIntercom = ParamUtils.getBooleanParameter( request, "globalIntercom" );
@@ -175,8 +188,6 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.enabled", enableSip );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.direct.sip", Boolean.toString( allowdirectsip ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", focusjid );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", focuspassword );
 
             ofmeetConfig.setResolution( Integer.parseInt( resolution ) );
             ofmeetConfig.setLocalNATAddress( localAddress );
@@ -185,6 +196,8 @@
             ofmeetConfig.setAdaptiveLastN( adaptivelastn );
             ofmeetConfig.setSimulcast( simulcast );
             ofmeetConfig.setAdaptiveSimulcast( adaptivesimulcast );
+            ofmeetConfig.setFocusUser( focusJID );
+            ofmeetConfig.setFocusPassword( focuspassword );
 
             container.configureGlobalIntercom( globalIntercom );
 
@@ -240,6 +253,10 @@
 
 <c:if test="${restartNeeded}">
     <admin:infoBox type="warning"><fmt:message key="config.page.configuration.restart.warning"/></admin:infoBox>
+</c:if>
+
+<c:if test="${empty ofmeetConfig.focusUser}">
+    <admin:infoBox type="warning"><fmt:message key="config.page.configuration.focus.jid.warning"/></admin:infoBox>
 </c:if>
 
 <p><fmt:message key="config.page.settings.introduction" /></p>
@@ -333,11 +350,11 @@
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.focus.jid"/>:</td>
-                <td><input type="text" size="20" maxlength="100" name="focusjid" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@".concat( serverInfo.XMPPDomain ))}"></td>
+                <td><input type="text" size="20" maxlength="100" name="focusjid" value="${ofmeetConfig.focusUser}"></td>
             </tr>
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.focus.password"/>:</td>
-                <td><input type="password" size="20" maxlength="100" name="focuspassword" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.focus.user.password", "focus-password-".concat( random.nextInt(15) ) )}"></td>
+                <td><input type="password" size="20" maxlength="100" name="focuspassword" value="${ofmeetConfig.focusPassword}"></td>
             </tr>
             <tr>
                 <td nowrap colspan="2">

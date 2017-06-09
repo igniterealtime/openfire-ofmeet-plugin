@@ -101,7 +101,6 @@ public class ConfigServlet extends HttpServlet
             String minChromeExtVer = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", "0.1" );
             int startBitrate = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.start.bitrate", 800 );
             boolean logStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.stats.logging", false );
-            String focusUserJid = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", "focus@" + xmppDomain );
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
 
@@ -152,7 +151,7 @@ public class ConfigServlet extends HttpServlet
                 config.put( "recordingKey", recordingKey );
             }
             config.put( "clientNode", "http://igniterealtime.org/ofmeet/jitsi-meet/" );
-            config.put( "focusUserJid", focusUserJid );
+            config.put( "focusUserJid", ofMeetConfig.getFocusUser() );
             config.put( "defaultSipNumber", defaultSipNumber );
             config.put( "desktopSharing", desktopSharing );
             config.put( "chromeExtensionId", chromeExtensionId );

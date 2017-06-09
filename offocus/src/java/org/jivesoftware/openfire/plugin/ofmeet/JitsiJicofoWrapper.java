@@ -17,6 +17,7 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import net.java.sip.communicator.util.ServiceUtils;
+import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.jicofo.FocusBundleActivator;
 import org.jitsi.jicofo.JvbDoctor;
 import org.jitsi.jicofo.auth.AuthenticationAuthority;
@@ -31,6 +32,7 @@ import org.jitsi.jicofo.osgi.JicofoBundleConfig;
 import org.jitsi.jicofo.xmpp.FocusComponent;
 import org.jitsi.meet.OSGi;
 import org.jitsi.meet.OSGiBundleConfig;
+import org.xmpp.packet.JID;
 
 /**
  * A wrapper object for the Jitsi Component Focus (jicofo) component.
@@ -57,29 +59,24 @@ public class JitsiJicofoWrapper
     {
         Log.debug( "Initializing Jitsi Focus Component (jicofo)...");
 
+        final OFMeetConfig config = new OFMeetConfig();
         if ( jicofoComponent != null )
         {
             Log.warn( "Another Jitsi Focus Component (jicofo) appears to have been initialized earlier! Unexpected behavior might be the result of this new initialization!" );
         }
 
-        String focusUserName = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.jid" );
-        if ( focusUserName == null || focusUserName.isEmpty() )
-        {
-            Log.warn( "The focus user JID is not configured in property 'org.jitsi.videobridge.ofmeet.focus.user.jid', which is likely going to cause problems!" );
-            focusUserName = XMPPServer.getInstance().createJID( "focus", "unused" ).toBareJID();
-        }
-
-        final String focusPassword = JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.focus.user.password", "" );
-        if ( focusPassword == null || focusPassword.isEmpty())
-        {
-            Log.warn( "The focus user password is not configured in property 'org.jitsi.videobridge.ofmeet.focus.user.password', which is likely going to cause problems!" );
-        }
-
         System.setProperty( FocusManager.HOSTNAME_PNAME, XMPPServer.getInstance().getServerInfo().getHostname() );
         System.setProperty( FocusManager.XMPP_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
         System.setProperty( FocusManager.FOCUS_USER_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
-        System.setProperty( FocusManager.FOCUS_USER_NAME_PNAME, focusUserName.split("@")[0]);
-        System.setProperty( FocusManager.FOCUS_USER_PASSWORD_PNAME, focusPassword);
+        if ( config.getFocusUser() == null )
+        {
+            Log.warn( "No 'focus' user is available. This is likely going to cause problems in webRTC meetings." );
+        }
+        else
+        {
+            System.setProperty( FocusManager.FOCUS_USER_NAME_PNAME, config.getFocusUser().getNode() );
+            System.setProperty( FocusManager.FOCUS_USER_PASSWORD_PNAME, config.getFocusPassword() );
+        }
 
         // Disable health check. Our JVB is not an external component, so there's no need to check for its connectivity.
         // Also, the health check appears to cumulatively use and not release resources!
@@ -95,7 +92,7 @@ public class JitsiJicofoWrapper
         final OSGiBundleConfig jicofoConfig = new JicofoBundleConfig();
         OSGi.setBundleConfig(jicofoConfig);
 
-        jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, focusUserName);
+        jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, config.getFocusUser().toBareJID() );
 
         Thread.sleep(2000 ); // Intended to prevent ConcurrentModificationExceptions while starting the component. See https://github.com/igniterealtime/ofmeet-openfire-plugin/issues/4
         jicofoComponent.init(); // Note that this is a Jicoco special, not Component#initialize!
