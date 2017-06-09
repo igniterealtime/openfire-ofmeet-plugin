@@ -96,7 +96,10 @@ public class JitsiJicofoWrapper
         OSGi.setBundleConfig(jicofoConfig);
 
         jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, focusUserName);
+
+        Thread.sleep(2000 ); // Intended to prevent ConcurrentModificationExceptions while starting the component. See https://github.com/igniterealtime/ofmeet-openfire-plugin/issues/4
         jicofoComponent.init(); // Note that this is a Jicoco special, not Component#initialize!
+        Thread.sleep(2000 ); // Intended to prevent ConcurrentModificationExceptions while starting the component. See https://github.com/igniterealtime/ofmeet-openfire-plugin/issues/4
 
         ComponentManagerFactory.getComponentManager().addComponent(jicofoSubdomain, jicofoComponent);
 
