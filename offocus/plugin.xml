@@ -23,5 +23,5 @@
     <author>Ignite Realtime</author>
     <version>${project.version}</version>
     <date>06/01/2017</date>
-    <minServerVersion>4.2.0 Alpha</minServerVersion>
+    <minServerVersion>4.1.5</minServerVersion>
 </plugin>
