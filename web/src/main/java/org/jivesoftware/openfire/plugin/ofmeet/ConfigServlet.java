@@ -151,7 +151,7 @@ public class ConfigServlet extends HttpServlet
                 config.put( "recordingKey", recordingKey );
             }
             config.put( "clientNode", "http://igniterealtime.org/ofmeet/jitsi-meet/" );
-            config.put( "focusUserJid", ofMeetConfig.getFocusUser() );
+            config.put( "focusUserJid", XMPPServer.getInstance().createJID( "focus", null ).toBareJID() );
             config.put( "defaultSipNumber", defaultSipNumber );
             config.put( "desktopSharing", desktopSharing );
             config.put( "chromeExtensionId", chromeExtensionId );

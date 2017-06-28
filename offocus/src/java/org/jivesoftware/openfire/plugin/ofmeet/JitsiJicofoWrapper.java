@@ -68,13 +68,13 @@ public class JitsiJicofoWrapper
         System.setProperty( FocusManager.HOSTNAME_PNAME, XMPPServer.getInstance().getServerInfo().getHostname() );
         System.setProperty( FocusManager.XMPP_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
         System.setProperty( FocusManager.FOCUS_USER_DOMAIN_PNAME, XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
-        if ( config.getFocusUser() == null )
+        if ( config.getFocusPassword() == null )
         {
-            Log.warn( "No 'focus' user is available. This is likely going to cause problems in webRTC meetings." );
+            Log.warn( "No password is configured for the 'focus'. This is likely going to cause problems in webRTC meetings." );
         }
         else
         {
-            System.setProperty( FocusManager.FOCUS_USER_NAME_PNAME, config.getFocusUser().getNode() );
+            System.setProperty( FocusManager.FOCUS_USER_NAME_PNAME, "focus" );
             System.setProperty( FocusManager.FOCUS_USER_PASSWORD_PNAME, config.getFocusPassword() );
         }
 
@@ -92,7 +92,7 @@ public class JitsiJicofoWrapper
         final OSGiBundleConfig jicofoConfig = new JicofoBundleConfig();
         OSGi.setBundleConfig(jicofoConfig);
 
-        jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, config.getFocusUser().toBareJID() );
+        jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, XMPPServer.getInstance().createJID( "focus", null ).toBareJID() );
 
         Thread.sleep(2000 ); // Intended to prevent ConcurrentModificationExceptions while starting the component. See https://github.com/igniterealtime/ofmeet-openfire-plugin/issues/4
         jicofoComponent.init(); // Note that this is a Jicoco special, not Component#initialize!

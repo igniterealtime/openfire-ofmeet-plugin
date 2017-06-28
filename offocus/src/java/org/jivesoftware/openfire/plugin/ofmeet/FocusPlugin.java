@@ -60,40 +60,30 @@ public class FocusPlugin implements Plugin
     {
         final OFMeetConfig config = new OFMeetConfig();
 
-        JID focusJID = config.getFocusUser();
-        if ( config.getFocusUser() == null )
+        final UserManager userManager = XMPPServer.getInstance().getUserManager();
+        if ( !userManager.isRegisteredUser( "focus" ) )
         {
-            final String username = "focus-" + StringUtils.randomString( 4 );
-            focusJID = XMPPServer.getInstance().createJID( username, "ignored" ).asBareJID();
-        }
+            Log.info( "No pre-existing 'focus' user detected. Generating one." );
 
-        String password = config.getFocusPassword();
-        if ( password == null || password.isEmpty() )
-        {
-            password = StringUtils.randomString( 40 );
-        }
-
-        if ( XMPPServer.getInstance().isLocal( focusJID ) )
-        {
-            final UserManager userManager = XMPPServer.getInstance().getUserManager();
-            if ( !userManager.isRegisteredUser( focusJID ) )
+            String password = config.getFocusPassword();
+            if ( password == null || password.isEmpty() )
             {
-                Log.info( "No pre-existing 'focus' user detected. Generating one." );
-                try
-                {
-                    userManager.createUser(
-                            focusJID.getNode(),
-                            password,
-                            "Focus User (generated)",
-                            null
-                    );
-                    config.setFocusUser( focusJID );
-                    config.setFocusPassword( password );
-                }
-                catch ( Exception e )
-                {
-                    Log.error( "Unable to provision a 'focus' user.", e );
-                }
+                password = StringUtils.randomString( 40 );
+            }
+
+            try
+            {
+                userManager.createUser(
+                        "focus",
+                        password,
+                        "Focus User (generated)",
+                        null
+                );
+                config.setFocusPassword( password );
+            }
+            catch ( Exception e )
+            {
+                Log.error( "Unable to provision a 'focus' user.", e );
             }
         }
     }

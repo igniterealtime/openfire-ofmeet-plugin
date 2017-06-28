@@ -307,40 +307,6 @@ public class OFMeetConfig
         JiveGlobals.deleteProperty( "ofmeet.lipSync.enabled" );
     }
 
-    public void setFocusUser( JID jid )
-    {
-        if ( jid == null )
-        {
-            JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid" );
-        }
-        else
-        {
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid", jid.toBareJID() );
-        }
-    }
-
-    public JID getFocusUser()
-    {
-        final String value = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid" );
-        if ( value != null )
-        {
-            try
-            {
-                return new JID( value ).asBareJID();
-            }
-            catch ( RuntimeException e )
-            {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    public void resetFocusUser()
-    {
-        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.focus.user.jid" );
-    }
-
     public void setFocusPassword( String password )
     {
         JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.focus.user.password", password );

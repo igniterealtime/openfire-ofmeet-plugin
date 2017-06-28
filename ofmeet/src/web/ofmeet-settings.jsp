@@ -140,18 +140,6 @@
         final String enableSip = request.getParameter( "enableSip" );
         final boolean allowdirectsip = ParamUtils.getBooleanParameter( request, "allowdirectsip" );
 
-        JID focusJID = null;
-        final String focusValue = request.getParameter( "focusjid" );
-        try {
-            if ( focusValue.contains( "@" ) ) {
-                focusJID = new JID( focusValue ).asBareJID();
-            } else {
-                focusJID = XMPPServer.getInstance().createJID( focusValue, "ignored" ).asBareJID();
-            }
-        } catch ( RuntimeException e ) {
-            errors.put( "focusjid", "Unable to parse value as JID" );
-        }
-
         final String focuspassword = request.getParameter( "focuspassword" );
         final String hqVoice = request.getParameter( "hqVoice" );
         final boolean globalIntercom = ParamUtils.getBooleanParameter( request, "globalIntercom" );
@@ -196,7 +184,6 @@
             ofmeetConfig.setAdaptiveLastN( adaptivelastn );
             ofmeetConfig.setSimulcast( simulcast );
             ofmeetConfig.setAdaptiveSimulcast( adaptivesimulcast );
-            ofmeetConfig.setFocusUser( focusJID );
             ofmeetConfig.setFocusPassword( focuspassword );
 
             container.configureGlobalIntercom( globalIntercom );
@@ -253,10 +240,6 @@
 
 <c:if test="${restartNeeded}">
     <admin:infoBox type="warning"><fmt:message key="config.page.configuration.restart.warning"/></admin:infoBox>
-</c:if>
-
-<c:if test="${empty ofmeetConfig.focusUser}">
-    <admin:infoBox type="warning"><fmt:message key="config.page.configuration.focus.jid.warning"/></admin:infoBox>
 </c:if>
 
 <p><fmt:message key="config.page.settings.introduction" /></p>
@@ -350,7 +333,7 @@
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.focus.jid"/>:</td>
-                <td><input type="text" size="20" maxlength="100" name="focusjid" value="${ofmeetConfig.focusUser}"></td>
+                <td><input type="text" size="20" maxlength="100" value="focus" readonly></td>
             </tr>
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.focus.password"/>:</td>
