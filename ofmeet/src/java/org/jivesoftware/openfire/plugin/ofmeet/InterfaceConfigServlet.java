@@ -75,10 +75,11 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "filmStripOnly",                         JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.filmstriponly",                 false               ) );
             config.put( "RANDOM_AVATAR_URL_PREFIX",              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.random.avatar.url.prefix",      ""                  ) );
             config.put( "RANDOM_AVATAR_URL_SUFFIX",              JiveGlobals.getProperty(        "org.jitsi.videobridge.ofmeet.random.avatar.url.suffix",      ""                  ) );
-            config.put( "FILM_STRIP_MAX_HEIGHT",                 JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.film.strip.max.height",         120                 ) );
+            config.put( "FILM_STRIP_MAX_HEIGHT",                 JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.film.strip.max.height",         120                  ) );
             config.put( "ENABLE_FEEDBACK_ANIMATION",             JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.feedback_animation",     false               ) );
             config.put( "DISABLE_FOCUS_INDICATOR",               JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disable.focus.indicator",       false               ) );
             config.put( "ACTIVE_SPEAKER_AVATAR_SIZE",            JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.active.speaker.avatarsize",     100                 ) );
+			config.put( "VERTICAL_FILMSTRIP",                 	 JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.vertical.filmstrip",            false               ) );
 
             // Jitsi-meet appears to have replaced LOCAL_THUMBNAIL_RATIO_WIDTH and LOCAL_THUMBNAIL_RATIO_HEIGHT with a combined value in LOCAL_THUMBNAIL_RATIO.
             final int localThumbnailRatioWidth  = JiveGlobals.getIntProperty("org.jitsi.videobridge.ofmeet.local.thumbnail.ratio.width",16 );
