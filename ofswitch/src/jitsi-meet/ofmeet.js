@@ -424,7 +424,16 @@ var ofmeet = (function(of)
 	config.dialInConfCodeUrl = 'https://' + window.location.host + '/meet/conferencemapper.json';
 	config.dialOutCodesUrl = 'https://' + window.location.host + '/meet/countrycodes.json';
 	config.dialOutAuthUrl = 'https://' + window.location.host + '/meet/authorizephone.json';
-			
+
+    config.p2p = {
+        enabled: true,
+        stunServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" },
+            { urls: "stun:stun2.l.google.com:19302" }
+        ],
+        preferH264: true
+    }			
 
 	var urlParam = function urlParam(name)
 	{
@@ -436,7 +445,7 @@ var ofmeet = (function(of)
 	if (urlParam("noaudio")) config.devices = ['video'];   
 	if (urlParam("novideo")) config.devices = ['audio'];
 		
-    	return of;
+    return of;
     	
 }(ofmeet || {}));	
 

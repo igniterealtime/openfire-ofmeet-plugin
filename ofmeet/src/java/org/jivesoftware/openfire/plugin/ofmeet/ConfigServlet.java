@@ -123,7 +123,11 @@ public class ConfigServlet extends HttpServlet
                 Log.debug( "OFMeetConfig. got xirsys json " + xirsysJson );
 
                 JSONObject jsonObject = new JSONObject( xirsysJson );
-                iceServers = jsonObject.getString( "d" );
+
+                if (jsonObject.has( "d" ))
+                {
+                	iceServers = jsonObject.getString( "d" );
+				}
 
                 Log.debug( "OFMeetConfig. got xirsys iceSevers " + iceServers );
             }
