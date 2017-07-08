@@ -77,7 +77,7 @@
             <tbody> 
 	    <tr>
 		<td nowrap  colspan="2">
-			<input type="checkbox" name="fsEnabled"<%= (JiveGlobals.getProperty("freeswitch.enabled", "true").equals("true")) ? " checked" : "" %>>
+			<input type="checkbox" name="fsEnabled"<%= (JiveGlobals.getProperty("freeswitch.enabled", "false").equals("true")) ? " checked" : "" %>>
 			<fmt:message key="settings.freeswitch.enabled" />		
 		</td>
 	    </tr>	    	    	    

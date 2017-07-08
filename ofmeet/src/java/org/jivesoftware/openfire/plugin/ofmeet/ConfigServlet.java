@@ -79,7 +79,7 @@ public class ConfigServlet extends HttpServlet
 
             final OFMeetConfig ofMeetConfig = new OFMeetConfig();
 
-			final boolean isSwitchAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofswitch") != null;
+			final boolean isSwitchAvailable = JiveGlobals.getBooleanProperty("freeswitch.enabled", false);
             final String xmppDomain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
             final String sipDomain = JiveGlobals.getProperty("freeswitch.sip.hostname", getIpAddress());
 

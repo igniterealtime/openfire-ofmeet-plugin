@@ -28,8 +28,9 @@ var ofmeet = (function(of)
 			connection.mechanisms[Strophe.SASLOFMeet.prototype.name] = Strophe.SASLOFMeet;
 		
 			this.connection = connection;
+			of.connection = connection;	
 
-			this.connection.addHandler(function(message)
+			of.connection.addHandler(function(message)
 			{
 				console.log("ofmeet.js incoming xmpp", message);
 		
@@ -389,6 +390,8 @@ var ofmeet = (function(of)
 	{
 		console.log("ofmeet.js beforeunload");
 		
+		APP.conference._room.leave();
+		
 		hangup();
 		
 		if (of.sipUI)
@@ -396,6 +399,11 @@ var ofmeet = (function(of)
 			of.sipUI.unregister();
 			of.sipUI.stop();
 		}
+		
+		if (of.connection)
+		{
+			of.connection.disconnect();
+		}		
 
 		e.returnValue = 'Ok';
 	});
@@ -415,7 +423,7 @@ var ofmeet = (function(of)
 
 	});
 
-	if (config.id) 		localStorage.setItem("xmpp_username_override", config.id);
+	if (config.id) 			localStorage.setItem("xmpp_username_override", config.id);
 	if (config.password) 	localStorage.setItem("xmpp_password_override", config.password);	
 
 

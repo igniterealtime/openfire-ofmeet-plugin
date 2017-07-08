@@ -44,7 +44,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.2072.tar.bz2</url>
+                            <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.2088.tar.bz2</url>
                             <unpack>true</unpack>
                             <outputDirectory>classes</outputDirectory>
                             <!--<md5>f8465fce5bb74ab107169653e3b8d5b9</md5>-->

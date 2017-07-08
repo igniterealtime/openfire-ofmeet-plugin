@@ -25,10 +25,10 @@
     <date>06/30/2017</date>
     <minServerVersion>4.0.0</minServerVersion>
     <adminconsole>
-        <tab id="tab-ofswitch" name="${plugin.title}" url="freeswitch-settings.jsp" description="${plugin.title.description}">
-            <sidebar id="siderbar-freeswitch"  name="${plugin.title}">
-                <item id="freeswitch-overview"  	name="${config.freeswitch.overview.name}"  	description="${config.freeswitch.overview.description}"  	url="freeswitch-overview.jsp"/>
+        <tab id="tab-ofmeet" name="${plugin.meetings.title}" url="freeswitch-settings.jsp" description="${plugin.meetings.description}">
+            <sidebar id="siderbar-freeswitch"  name="${plugin.title}" description="${plugin.description}">
                 <item id="freeswitch-settings"  	name="${config.freeswitch.settings.name}"  	description="${config.freeswitch.settings.description}"  	url="freeswitch-settings.jsp"/>
+                <item id="freeswitch-overview"  	name="${config.freeswitch.overview.name}"  	description="${config.freeswitch.overview.description}"  	url="freeswitch-overview.jsp"/>
                 <item id="freeswitch-users"  		name="${config.freeswitch.users.name}"  	description="${config.freeswitch.users.description}"  		url="freeswitch-users.jsp"/>
                 <item id="freeswitch-conferences"  	name="${config.freeswitch.conferences.name}"  	description="${config.freeswitch.conferences.description}"  	url="freeswitch-conferences.jsp"/>
                 <item id="freeswitch-calls"  		name="${config.freeswitch.calls.name}"  	description="${config.freeswitch.calls.description}"  		url="freeswitch-calls.jsp"/>

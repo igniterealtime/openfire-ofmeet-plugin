@@ -142,7 +142,7 @@ public class OfSwitchPlugin implements Plugin, ClusterEventListener, IEslEventLi
 
 			checkNatives(pluginDirectory);
 
-			boolean freeswitchEnabled = JiveGlobals.getBooleanProperty("freeswitch.enabled", true);
+			boolean freeswitchEnabled = JiveGlobals.getBooleanProperty("freeswitch.enabled", false);
 
 			if (freeswitchEnabled)
 			{
