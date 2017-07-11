@@ -19,20 +19,18 @@ package org.jivesoftware.openfire.plugin.ofmeet;
 import net.java.sip.communicator.util.ServiceUtils;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.jicofo.FocusBundleActivator;
+import org.jitsi.jicofo.FocusManager;
 import org.jitsi.jicofo.JvbDoctor;
 import org.jitsi.jicofo.auth.AuthenticationAuthority;
-import org.jitsi.jicofo.reservation.ReservationSystem;
-import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.util.JiveGlobals;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xmpp.component.ComponentManagerFactory;
-import org.jitsi.jicofo.FocusManager;
 import org.jitsi.jicofo.osgi.JicofoBundleConfig;
+import org.jitsi.jicofo.reservation.ReservationSystem;
 import org.jitsi.jicofo.xmpp.FocusComponent;
 import org.jitsi.meet.OSGi;
 import org.jitsi.meet.OSGiBundleConfig;
-import org.xmpp.packet.JID;
+import org.jivesoftware.openfire.XMPPServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xmpp.component.ComponentManagerFactory;
 
 /**
  * A wrapper object for the Jitsi Component Focus (jicofo) component.
@@ -86,7 +84,8 @@ public class JitsiJicofoWrapper
         // Disable JVB rediscovery. We are running with one hard-coded videobridge, there's no need for dynamic detection of others.
         System.setProperty( "org.jitsi.jicofo.SERVICE_REDISCOVERY_INTERVAL", "-1" ); // Aught to use a reference to ComponentsDiscovery.REDISCOVERY_INTERVAL_PNAME, but that constant is private.
 
-        boolean focusAnonymous = "false".equals(JiveGlobals.getProperty("ofmeet.security.enabled", "true"));
+        // Typically, the focus user is a system user (our plugin provisions the user), but if that fails, anonymous authentication will be used.
+        final boolean focusAnonymous = config.getFocusPassword() == null;
 
         // Start the OSGi bundle for Jicofo.
         final OSGiBundleConfig jicofoConfig = new JicofoBundleConfig();
