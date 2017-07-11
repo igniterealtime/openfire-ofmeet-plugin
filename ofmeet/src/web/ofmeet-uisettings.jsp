@@ -77,13 +77,23 @@
         } catch (NumberFormatException ex ) {
             errors.put( "toolbarTimeout", "Cannot parse value as long value." );
         }
+        
+        final String filmstripMaxHeight = request.getParameter( "filmstripMaxHeight" ); 
+        try {
+            Integer.parseInt( filmstripMaxHeight );
+        } catch (NumberFormatException ex ) {
+            errors.put( "filmstripMaxHeight", "Cannot parse value as integer value." );
+        }
+        
         final String defRemoteDisplName = request.getParameter( "defRemoteDisplName" );
         final String defDomSpkrDisplName = request.getParameter( "defDomSpkrDisplName" );
-        final String defLocalDisplName = request.getParameter( "defLocalDisplName" );
+        final String defLocalDisplName = request.getParameter( "defLocalDisplName" );       
 
         final boolean showPoweredBy = ParamUtils.getBooleanParameter( request, "showPoweredBy" );
         final boolean randomRoomNames = ParamUtils.getBooleanParameter( request, "randomRoomNames" );
         final boolean lipSync = ParamUtils.getBooleanParameter( request, "lipSync" );
+        final boolean verticalFilmstrip = ParamUtils.getBooleanParameter( request, "verticalFilmstrip" );        
+        
 
         final boolean showWatermark = ParamUtils.getBooleanParameter( request, "showWatermark" );
         final String watermarkLogoUrlValue = request.getParameter( "watermarkLogoUrl" );
@@ -148,6 +158,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.remote.displayname", defRemoteDisplName );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.speaker.displayname", defDomSpkrDisplName );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.default.local.displayname", defLocalDisplName );
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.film.strip.max.height", filmstripMaxHeight );            
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.poweredby", Boolean.toString( showPoweredBy ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.random.roomnames", Boolean.toString( randomRoomNames ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.watermark.link", watermarkLink );
@@ -156,6 +167,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", Boolean.toString( brandShowWatermark ) );
 
             ofmeetConfig.setLipSync( lipSync );
+            ofmeetConfig.setVerticalFilmstrip( verticalFilmstrip );            
             ofmeetConfig.setWatermarkLogoUrl( watermarkLogoUrl );
             ofmeetConfig.setBrandWatermarkLogoUrl( brandWatermarkLogoUrl );
 
@@ -243,6 +255,10 @@
                 <td><input type="text" size="60" maxlength="100" name="defLocalDisplName" value="${admin:getProperty("org.jitsi.videobridge.ofmeet.default.local.displayname", "Me")}"></td>
             </tr>
             <tr>
+                <td width="200"><fmt:message key="ofmeet.filmstrip.max.height"/>:</td>
+                <td><input type="text" size="60" maxlength="100" name="filmstripMaxHeight" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.film.strip.max.height", 120)}"></td>
+            </tr>            
+            <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="showPoweredBy" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.show.poweredby", false) ? "checked" : ""}>
                     <fmt:message key="ofmeet.show.poweredby.enabled" />
@@ -260,6 +276,12 @@
                     <fmt:message key="ofmeet.lipSync.enabled" />
                 </td>
             </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="verticalFilmstrip" ${ofmeetConfig.verticalFilmstrip ? "checked" : ""}>
+                    <fmt:message key="ofmeet.verticalFilmstrip.enabled" />
+                </td>
+            </tr>            
 		</table>
 	</admin:contentBox>
 

@@ -25,6 +25,7 @@ import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserManager;
+import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,18 @@ public class FocusPlugin implements Plugin
                 Log.error( "Unable to provision a 'focus' user.", e );
             }
         }
+
+		// Ensure that the 'focus' user is a sysadmin of the conference service(s).
+
+		JID focusUserJid = new JID("focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+		for ( MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
+		{
+			if (!mucService.isSysadmin( focusUserJid ))
+			{
+				mucService.addSysadmin( focusUserJid );
+			}
+		}
     }
 
     @Override

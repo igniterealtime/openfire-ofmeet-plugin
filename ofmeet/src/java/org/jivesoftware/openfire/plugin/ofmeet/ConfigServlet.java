@@ -24,6 +24,14 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
+
+import org.jivesoftware.openfire.plugin.spark.BookmarkManager;
+import org.jivesoftware.openfire.plugin.spark.Bookmark;
+import org.jivesoftware.openfire.vcard.VCardManager;
+import org.jivesoftware.openfire.user.User;
+import org.jivesoftware.openfire.group.Group;
+import org.jivesoftware.openfire.group.GroupManager;
+import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.util.JiveGlobals;
 import org.json.JSONArray;
@@ -40,8 +48,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import org.dom4j.*;
+import org.xmpp.packet.JID;
 
 /**
  * A servlet that generates a snippet of javascript (json) that is the 'config' variable, as used by the Jitsi
@@ -70,9 +79,11 @@ public class ConfigServlet extends HttpServlet
 
             final OFMeetConfig ofMeetConfig = new OFMeetConfig();
 
+			final boolean isSwitchAvailable = JiveGlobals.getBooleanProperty("freeswitch.enabled", false);
             final String xmppDomain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
+            final String sipDomain = JiveGlobals.getProperty("freeswitch.sip.hostname", getIpAddress());
 
-            final JSONArray conferences = new JSONArray();
+            final JSONObject conferences = new JSONObject();
 
             writeHeader( response );
 
@@ -106,24 +117,43 @@ public class ConfigServlet extends HttpServlet
 
             if ( xirsysUrl != null )
             {
-                Log.info( "OFMeetConfig. found xirsys Url " + xirsysUrl );
+                Log.debug( "OFMeetConfig. found xirsys Url " + xirsysUrl );
 
                 String xirsysJson = getHTML( xirsysUrl );
-                Log.info( "OFMeetConfig. got xirsys json " + xirsysJson );
+                Log.debug( "OFMeetConfig. got xirsys json " + xirsysJson );
 
                 JSONObject jsonObject = new JSONObject( xirsysJson );
-                iceServers = jsonObject.getString( "d" );
 
-                Log.info( "OFMeetConfig. got xirsys iceSevers " + iceServers );
+                if (jsonObject.has( "d" ))
+                {
+                	iceServers = jsonObject.getString( "d" );
+				}
+
+                Log.debug( "OFMeetConfig. got xirsys iceSevers " + iceServers );
             }
 
             final JSONObject config = new JSONObject();
+
+			boolean securityEnabled = JiveGlobals.getBooleanProperty("ofmeet.security.enabled", false);
+
+			if (securityEnabled && request.getUserPrincipal() != null)
+			{
+				handleAuthenticatedUser(config, request, xmppDomain, conferences);
+			}
+
 
             final Map<String, String> hosts = new HashMap<>();
             hosts.put( "domain", xmppDomain );
             hosts.put( "muc", "conference." + xmppDomain );
             hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
             hosts.put( "focus", "focus." + xmppDomain );
+
+            if (isSwitchAvailable)
+            {
+				hosts.put( "callcontrol", "callcontrol." + xmppDomain );
+				hosts.put( "sip", sipDomain );
+			}
+
             config.put( "hosts", hosts );
 
 
@@ -202,6 +232,107 @@ public class ConfigServlet extends HttpServlet
         }
     }
 
+	private void handleAuthenticatedUser(JSONObject config, HttpServletRequest request, String xmppDomain, JSONObject conferences)
+	{
+		String userName = request.getUserPrincipal().getName();
+
+		config.put( "id", userName + "@" + xmppDomain );
+
+		try {
+			User user = XMPPServer.getInstance().getUserManager().getUser(userName);
+
+			config.put( "emailAddress", user.getEmail() );
+			config.put( "nickName", user.getName() );
+
+		} catch (Exception e) {
+			Log.error( "OFMeetConfig doGet Error", e );
+		}
+
+		final String token = TokenManager.getInstance().retrieveToken(request.getUserPrincipal());
+
+		if (token != null)
+		{
+			config.put( "password", token );
+		}
+
+		VCardManager vcardManager = VCardManager.getInstance();
+		Element vcard = vcardManager.getVCard(userName);
+
+		if (vcard != null)
+		{
+			Element photo = vcard.element("PHOTO");
+
+			if (photo != null)
+			{
+				String type = photo.element("TYPE").getText();
+				String binval = photo.element("BINVAL").getText();
+
+				config.put( "userAvatar", "data:" + type + ";base64," + binval.replace("\n", "").replace("\r", "") );
+			}
+		}
+
+		try {
+			final Collection<Bookmark> bookmarks = BookmarkManager.getBookmarks();
+
+			for (Bookmark bookmark : bookmarks)
+			{
+				boolean addBookmarkForUser = bookmark.isGlobalBookmark() || isBookmarkForJID(userName, bookmark);
+
+				if (addBookmarkForUser)
+				{
+					if (bookmark.getType() == Bookmark.Type.group_chat)
+					{
+						String conferenceRoom = (new JID(bookmark.getValue())).getNode();
+						String autoJoin =  bookmark.getProperty("autojoin");
+
+						JSONObject conference = new JSONObject();
+						conference.put("name", bookmark.getName());
+						conference.put("jid", bookmark.getValue());
+
+						if (autoJoin != null && "true".equals(autoJoin))
+						{
+							conference.put("audiobridgeNumber", conferenceRoom);
+						}
+
+						conferences.put(conferenceRoom, conference);
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			Log.error("Config servlet", e);
+		}
+	}
+
+    private boolean isBookmarkForJID(String username, Bookmark bookmark) {
+
+		if (username == null || username.equals("null")) return false;
+
+        if (bookmark.getUsers().contains(username)) {
+            return true;
+        }
+
+        Collection<String> groups = bookmark.getGroups();
+
+        if (groups != null && !groups.isEmpty()) {
+            GroupManager groupManager = GroupManager.getInstance();
+
+            for (String groupName : groups) {
+                try {
+                    Group group = groupManager.getGroup(groupName);
+
+                    if (group.isUser(username)) {
+                        return true;
+                    }
+                }
+                catch (GroupNotFoundException e) {
+                    Log.debug(e.getMessage(), e);
+                }
+            }
+        }
+        return false;
+    }
+
     private void writeHeader( HttpServletResponse response )
     {
         try
@@ -218,6 +349,20 @@ public class ConfigServlet extends HttpServlet
             Log.error( "OFMeetConfig writeHeader Error", e );
         }
     }
+
+	public String getIpAddress()
+	{
+		String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
+		String ourIpAddress = ourHostname;
+
+		try {
+			ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
+		} catch (Exception e) {
+
+		}
+
+		return ourIpAddress;
+	}
 
     private String getHTML( String urlToRead )
     {
@@ -276,7 +421,7 @@ public class ConfigServlet extends HttpServlet
                 websocketScheme = "ws";
             }
 
-            return new URI( websocketScheme, null, request.getServerName(), request.getServerPort(), "/ws", null, null);
+            return new URI( websocketScheme, null, request.getServerName(), request.getServerPort(), "/ws/", null, null);
         }
         else
         {
