@@ -23,7 +23,7 @@ import org.jitsi.jicofo.reservation.ReservationSystem;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
-import org.jivesoftware.openfire.user.User;
+import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.util.StringUtils;
 import org.slf4j.Logger;
@@ -33,14 +33,17 @@ import org.xmpp.packet.JID;
 import java.io.File;
 
 /**
- * Created by guus on 25-4-17.
+ * An Openfire plugin that provides 'focus' functionality to Openfire.
+ *
+ * This plugin is largely based on Jitsi's Jicofo implementation, which is complemented by Openfire-specific provisioning.
+ *
+ * @author Guus der Kinderen, guus@goodbytes.nl
  */
 public class FocusPlugin implements Plugin
 {
     private static final Logger Log = LoggerFactory.getLogger( FocusPlugin.class );
 
     private final JitsiJicofoWrapper jitsiJicofoWrapper = new JitsiJicofoWrapper();
-
 
     @Override
     public void initializePlugin( PluginManager pluginManager, File file )
@@ -60,6 +63,7 @@ public class FocusPlugin implements Plugin
     {
         final OFMeetConfig config = new OFMeetConfig();
 
+        // Ensure that the 'focus' user exists.
         final UserManager userManager = XMPPServer.getInstance().getUserManager();
         if ( !userManager.isRegisteredUser( "focus" ) )
         {
@@ -84,6 +88,17 @@ public class FocusPlugin implements Plugin
             catch ( Exception e )
             {
                 Log.error( "Unable to provision a 'focus' user.", e );
+            }
+        }
+
+        // Ensure that the 'focus' user can grant permissions in persistent MUCs by making it a sysadmin of the conference service(s).
+        final JID focusUserJid = new JID( "focus@" + XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
+        for ( final MultiUserChatService mucService : XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices() )
+        {
+            if ( !mucService.isSysadmin( focusUserJid ) )
+            {
+                Log.info( "Adding 'focus' user as a sysadmin to the '{}' MUC service.", mucService.getServiceName() );
+                mucService.addSysadmin( focusUserJid );
             }
         }
     }
