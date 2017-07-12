@@ -77,6 +77,16 @@
         } catch (NumberFormatException ex ) {
             errors.put( "toolbarTimeout", "Cannot parse value as long value." );
         }
+
+        int filmstripMaxHeight = ofmeetConfig.getFilmstripMaxHeight();
+        try {
+            filmstripMaxHeight = Integer.parseInt( request.getParameter( "filmstripMaxHeight" ) );
+        } catch (NumberFormatException ex) {
+            errors.put( "filmstripMaxHeight", "Cannot parse value as int value." );
+        }
+        final boolean verticalFilmstrip = ParamUtils.getBooleanParameter( request, "verticalFilmstrip" );
+        final boolean filmstripOnly = ParamUtils.getBooleanParameter( request, "filmstripOnly" );;
+
         final String defRemoteDisplName = request.getParameter( "defRemoteDisplName" );
         final String defDomSpkrDisplName = request.getParameter( "defDomSpkrDisplName" );
         final String defLocalDisplName = request.getParameter( "defLocalDisplName" );
@@ -154,6 +164,10 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.show.watermark", Boolean.toString( showWatermark ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", Boolean.toString( brandShowWatermark ) );
+
+            ofmeetConfig.setFilmstripMaxHeight( filmstripMaxHeight );
+            ofmeetConfig.setVerticalFilmstrip( verticalFilmstrip );
+            ofmeetConfig.setFilmstripOnly( filmstripOnly );
 
             ofmeetConfig.setLipSync( lipSync );
             ofmeetConfig.setWatermarkLogoUrl( watermarkLogoUrl );
@@ -258,6 +272,29 @@
                 <td nowrap colspan="2">
                     <input type="checkbox" name="lipSync" ${ofmeetConfig.lipSync ? "checked" : ""}>
                     <fmt:message key="ofmeet.lipSync.enabled" />
+                </td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+    <fmt:message key="ofmeet.filmstrip.title" var="boxtitleFilmstrip"/>
+    <admin:contentBox title="${boxtitleFilmstrip}">
+        <p><fmt:message key="ofmeet.filmstrip.description"/></p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.filmstrip.max.height"/>:</td>
+                <td><input type="text" size="60" maxlength="100" name="filmstripMaxHeight" value="${ofmeetConfig.filmstripMaxHeight}"></td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="verticalFilmstrip" ${ofmeetConfig.verticalFilmstrip ? "checked" : ""}>
+                    <fmt:message key="ofmeet.verticalFilmstrip.enabled" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="filmstripOnly" ${ofmeetConfig.filmstripOnly ? "checked" : ""}>
+                    <fmt:message key="ofmeet.filmstripOnly.enabled" />
                 </td>
             </tr>
 		</table>

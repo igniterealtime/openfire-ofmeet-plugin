@@ -321,4 +321,48 @@ public class OFMeetConfig
     {
         JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.focus.user.password" );
     }
+
+    public void setFilmstripOnly( boolean filmstripOnly )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.filmstriponly", Boolean.toString( filmstripOnly ) );
+    }
+
+    public boolean getFilmstripOnly()
+    {
+        return JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.filmstriponly", false );
+    }
+
+    public void resetFilmstripOnly()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.filmstriponly" );
+    }
+
+    public void setFilmstripMaxHeight( int filmstripMaxHeight )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.film.strip.max.height", Integer.toString( filmstripMaxHeight ) );
+    }
+
+    public int getFilmstripMaxHeight()
+    {
+        return JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.film.strip.max.height", 120 );
+    }
+
+    public void resetFilmstripMaxHeight()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.film.strip.max.height" );
+    }
+    public void setVerticalFilmstrip( boolean verticalFilmstrip )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.vertical.filmstrip", Boolean.toString( verticalFilmstrip ) );
+    }
+
+    public boolean getVerticalFilmstrip()
+    {
+        return JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.vertical.filmstrip", true );
+    }
+
+    public void resetVerticalFilmstrip()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.vertical.filmstrip" );
+    }
 }
