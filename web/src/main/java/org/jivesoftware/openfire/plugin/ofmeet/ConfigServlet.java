@@ -169,8 +169,15 @@ public class ConfigServlet extends HttpServlet
             config.put( "disableAudioLevels", false );
             config.put( "stereo", false );
             config.put( "requireDisplayName", false );
-            config.put( "startAudioMuted", 9 );
-            config.put( "startVideoMuted", 9 );
+            config.put( "startAudioOnly", ofMeetConfig.getStartAudioOnly() );
+            if ( ofMeetConfig.getStartAudioMuted() != null )
+            {
+                config.put( "startAudioMuted", ofMeetConfig.getStartAudioMuted() );
+            }
+            if ( ofMeetConfig.getStartVideoMuted() != null )
+            {
+                config.put( "startVideoMuted", ofMeetConfig.getStartVideoMuted() );
+            }
             config.put( "resolution", ofMeetConfig.getResolution() );
             config.put( "audioMixer", audioMixer );
             config.put( "audioBandwidth", audioBandwidth );

@@ -17,7 +17,6 @@
 package org.igniterealtime.openfire.plugin.ofmeet.config;
 
 import org.jivesoftware.util.JiveGlobals;
-import org.xmpp.packet.JID;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -351,6 +350,7 @@ public class OFMeetConfig
     {
         JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.film.strip.max.height" );
     }
+
     public void setVerticalFilmstrip( boolean verticalFilmstrip )
     {
         JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.vertical.filmstrip", Boolean.toString( verticalFilmstrip ) );
@@ -364,5 +364,54 @@ public class OFMeetConfig
     public void resetVerticalFilmstrip()
     {
         JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.vertical.filmstrip" );
+    }
+
+    public void setStartAudioOnly( boolean startAudioOnly )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.startaudioonly", Boolean.toString( startAudioOnly ) );
+    }
+
+    public boolean getStartAudioOnly()
+    {
+        return JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.startaudioonly", false );
+    }
+
+    public void resetStartAudioOnly()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.startaudioonly" );
+    }
+
+    public void setStartAudioMuted( Integer startAudioMuted )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.startaudiomuted", Integer.toString( startAudioMuted == null ? Integer.MAX_VALUE : startAudioMuted ) );
+    }
+
+    public Integer getStartAudioMuted()
+    {
+        // In storage, 'no limit' is represented by Integer.MAX_VALUE. 'Default' is represented by a null value.
+        final int startAudioMuted = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.startaudiomuted", 9 );
+        return startAudioMuted == Integer.MAX_VALUE ? null : startAudioMuted;
+    }
+
+    public void resetStartAudioMuted()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.startaudiomuted" );
+    }
+
+    public void setStartVideoMuted( Integer startVideoMuted )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.startvideomuted", Integer.toString( startVideoMuted == null ? Integer.MAX_VALUE : startVideoMuted ) );
+    }
+
+    public Integer getStartVideoMuted()
+    {
+        // In storage, 'no limit' is represented by Integer.MAX_VALUE. 'Default' is represented by a null value.
+        final int startVideoMuted = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.startvideomuted", 9 );
+        return startVideoMuted == Integer.MAX_VALUE ? null : startVideoMuted;
+    }
+
+    public void resetStartVideoMuted()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.startvideomuted" );
     }
 }
