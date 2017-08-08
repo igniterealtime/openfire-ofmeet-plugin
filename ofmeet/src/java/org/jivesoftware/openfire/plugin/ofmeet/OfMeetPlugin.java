@@ -48,6 +48,9 @@ import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslServer;
 import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.PropertyEventDispatcher;
+import org.jivesoftware.util.PropertyEventListener;
+import org.json.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
@@ -55,6 +58,8 @@ import org.xmpp.packet.IQ;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,6 +67,7 @@ import java.nio.file.Paths;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
@@ -72,8 +78,8 @@ import java.util.List;
  * -- autorecord should become jitsi videobridge feature: https://github.com/jitsi/jitsi-videobridge/issues/344
  * - jicofo moved from (modified) jitsiplugin and moved to this class
  */
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener  {
-
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PropertyEventListener
+{
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
 
     public boolean restartNeeded = false;
@@ -157,6 +163,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
             final String hasGlobalIntercom = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.global.intercom", "off" );
             configureGlobalIntercom( hasGlobalIntercom.equalsIgnoreCase( "true" ) || hasGlobalIntercom.equalsIgnoreCase( "on" ) );
+
+            PropertyEventDispatcher.addListener( this );
 		}
 		catch (Exception e) {
 			Log.error("Could NOT start open fire meetings", e);
@@ -168,7 +176,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 	public void destroyPlugin()
     {
-    	try
+        PropertyEventDispatcher.removeListener( this );
+
+        try
 		{
 			unloadPublicWebApp();
 		}
@@ -253,7 +263,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 		publicWebApp = new WebAppContext();
 		publicWebApp.setWar( webApp.getAbsolutePath() );
-		publicWebApp.setContextPath( "/ofmeet/jitsi-meet" );
+		publicWebApp.setContextPath( new OFMeetConfig().getWebappContextPath() );
 
 		Log.debug( "Making WebAppContext available on HttpBindManager context." );
 		HttpBindManager.getInstance().addJettyHandler( publicWebApp );
@@ -283,6 +293,32 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			}
 		}
 	}
+
+	public URL getWebappURL()
+    {
+        try
+        {
+            final String protocol = "https"; // No point in providing the non-SSL protocol, as webRTC won't work there.
+            final String host = XMPPServer.getInstance().getServerInfo().getHostname();
+            final int port = HttpBindManager.getInstance().getHttpBindSecurePort();
+            final String path;
+            if ( publicWebApp != null )
+            {
+                path = publicWebApp.getContextPath();
+            }
+            else
+            {
+                path = new OFMeetConfig().getWebappContextPath();
+            }
+
+            return new URL( protocol, host, port, path );
+        }
+        catch ( MalformedURLException e )
+        {
+            Log.error( "Unable to compose the webapp URL", e );
+            return null;
+        }
+    }
 
 	/**
 	 * Jitsi takes most of its configuration through system properties. This method sets these
@@ -533,4 +569,50 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			Log.info("OfMeet Plugin - closing skype session " + sipuri);
 		}
 	}
+
+    @Override
+    public void propertySet( String s, Map<String, Object> map )
+    {
+        switch (s)
+        {
+            case OFMeetConfig.OFMEET_WEBAPP_CONTEXTPATH_PROPERTYNAME:
+                final String currentValue = this.publicWebApp.getContextPath();
+                final String updatedValue = new OFMeetConfig().getWebappContextPath();
+                if ( !currentValue.equals( updatedValue ) )
+                {
+                    Log.debug( "A configuration change requires the web application to be reloaded on a different context path. Old path: {}, new path: {}.", currentValue, updatedValue );
+                    try
+                    {
+                        unloadPublicWebApp();
+                        loadPublicWebApp();
+                    }
+                    catch ( Exception e )
+                    {
+                        Log.error( "An exception occurred while trying to re-load the web application on a different context path. Old path: {}, new path: {}.", currentValue, updatedValue, e );
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public void propertyDeleted( String s, Map<String, Object> map )
+    {
+        propertySet( s, map );
+    }
+
+    @Override
+    public void xmlPropertySet( String s, Map<String, Object> map )
+    {
+
+    }
+
+    @Override
+    public void xmlPropertyDeleted( String s, Map<String, Object> map )
+    {
+
+    }
 }

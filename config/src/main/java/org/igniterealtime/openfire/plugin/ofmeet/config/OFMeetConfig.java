@@ -34,7 +34,37 @@ import java.util.List;
  */
 public class OFMeetConfig
 {
+    public static final String OFMEET_WEBAPP_CONTEXTPATH_PROPERTYNAME = "ofmeet.webapp.contextpath";
+
     // No static methods! Static methods are not accessible when using this class as a bean in the Admin Console JSP pages.
+    public void setWebappContextPath( String contextPath )
+    {
+        JiveGlobals.setProperty( OFMEET_WEBAPP_CONTEXTPATH_PROPERTYNAME, contextPath );
+    }
+
+    public String getWebappContextPath()
+    {
+        String value = JiveGlobals.getProperty( OFMEET_WEBAPP_CONTEXTPATH_PROPERTYNAME, "/ofmeet" ).trim();
+
+        // Ensure that the value starts with a slash, but does not end with one (unless the root context is used).
+        if ( !value.startsWith( "/" ) )
+        {
+            value = "/" + value;
+        }
+
+        while ( value.endsWith( "/" ) && value.length() > 1 )
+        {
+            value = value.substring( 0, value.length() -1 );
+        }
+
+        return value;
+    }
+
+    public void resetWebappContextPath()
+    {
+        JiveGlobals.deleteProperty( OFMEET_WEBAPP_CONTEXTPATH_PROPERTYNAME );
+    }
+
     public void setChannelLastN( int lastN )
     {
         JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.channel.lastn", Integer.toString( lastN ) );

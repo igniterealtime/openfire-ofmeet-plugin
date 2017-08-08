@@ -42,6 +42,12 @@
 			errors.put( "csrf", "CSRF Failure!" );
 		}
 
+		final String webappContextPath = request.getParameter( "webappcontextpath" );
+		if ( webappContextPath != null && !StringUtils.escapeHTMLTags( webappContextPath ).equals( webappContextPath ) )
+        {
+            errors.put( "webappContextPath", "Illegal value" );
+        }
+
         final String applicationName = request.getParameter( "applicationName" );
         final String activeSpkrAvatarSize = request.getParameter( "activeSpkrAvatarSize" );
         try {
@@ -165,6 +171,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.watermark.link", brandWatermarkLink );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.brand.show.watermark", Boolean.toString( brandShowWatermark ) );
 
+            ofmeetConfig.setWebappContextPath( webappContextPath );
             ofmeetConfig.setFilmstripMaxHeight( filmstripMaxHeight );
             ofmeetConfig.setVerticalFilmstrip( verticalFilmstrip );
             ofmeetConfig.setFilmstripOnly( filmstripOnly );
@@ -188,6 +195,7 @@
 
 	pageContext.setAttribute( "csrf", csrf );
 	pageContext.setAttribute( "errors", errors );
+	pageContext.setAttribute( "webappURL", container.getWebappURL() );
 %>
 <html>
 <head>
@@ -220,6 +228,21 @@
 <p><fmt:message key="config.page.uisettings.introduction" /></p>
 
 <form action="ofmeet-uisettings.jsp" method="post">
+
+    <fmt:message key="config.page.configuration.connectivity.title" var="boxtitleConnectivity"/>
+    <admin:contentBox title="${boxtitleConnectivity}">
+        <p>
+            <fmt:message key="config.page.configuration.connectivity.description">
+                <fmt:param value="${webappURL}"/>
+            </fmt:message>
+        </p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.connectivity.webappcontextpath"/>:</td>
+                <td><input type="text" size="60" maxlength="100" name="webappcontextpath" value="${ofmeetConfig.webappContextPath}"></td>
+            </tr>
+        </table>
+    </admin:contentBox>
 
 	<fmt:message key="config.page.configuration.ui.title" var="boxtitle"/>
 	<admin:contentBox title="${boxtitle}">
