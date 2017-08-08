@@ -253,7 +253,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 		publicWebApp = new WebAppContext();
 		publicWebApp.setWar( webApp.getAbsolutePath() );
-		publicWebApp.setContextPath( "/ofmeet" );
+		publicWebApp.setContextPath( "/ofmeet/jitsi-meet" );
 
 		Log.debug( "Making WebAppContext available on HttpBindManager context." );
 		HttpBindManager.getInstance().addJettyHandler( publicWebApp );

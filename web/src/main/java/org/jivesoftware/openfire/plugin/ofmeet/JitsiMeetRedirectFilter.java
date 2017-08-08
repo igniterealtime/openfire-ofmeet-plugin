@@ -54,7 +54,7 @@ public class JitsiMeetRedirectFilter implements Filter
 
     protected boolean hasCorrectContext( HttpServletRequest request )
     {
-        return request.getRequestURI().matches( request.getContextPath() + "/jitsi-meet/([^/]+)$" );
+        return request.getRequestURI().matches( request.getContextPath() + "/([^/]+)$" );
     }
 
     protected boolean containsExcludedExtension( HttpServletRequest request )
@@ -87,8 +87,8 @@ public class JitsiMeetRedirectFilter implements Filter
             }
             else
             {
-                Log.trace( "Forwarding " + request.getRequestURI() + " to /jitsi-meet/" );
-                RequestDispatcher dispatcher = request.getRequestDispatcher( "/jitsi-meet/" );
+                Log.trace( "Forwarding " + request.getRequestURI() + " to /" );
+                RequestDispatcher dispatcher = request.getRequestDispatcher( "/" );
                 dispatcher.forward( request, response );
                 return;
             }
