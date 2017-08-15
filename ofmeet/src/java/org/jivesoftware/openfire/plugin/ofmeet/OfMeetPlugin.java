@@ -29,7 +29,6 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.ice4j.ice.harvest.MappingCandidateHarvesters;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
-import org.jitsi.videobridge.Conference;
 import org.jitsi.videobridge.Videobridge;
 import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jivesoftware.openfire.XMPPServer;
@@ -50,7 +49,6 @@ import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
-import org.json.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
@@ -92,7 +90,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
 	private final JitsiPluginWrapper jitsiPluginWrapper;
     private final MeetingPlanner meetingPlanner;
-    private String globalConferenceId = null;
 
     public OfMeetPlugin()
 	{
@@ -160,9 +157,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
 
         	SessionEventDispatcher.addListener(this);
-
-            final String hasGlobalIntercom = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.global.intercom", "off" );
-            configureGlobalIntercom( hasGlobalIntercom.equalsIgnoreCase( "true" ) || hasGlobalIntercom.equalsIgnoreCase( "on" ) );
 
             PropertyEventDispatcher.addListener( this );
 		}
@@ -437,27 +431,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             Log.error("checkDownloadFolder", e);
         }
 	}
-
-	public void configureGlobalIntercom( boolean enabled )
-    {
-        if ( enabled && ( globalConferenceId == null || getVideobridge().getConference( globalConferenceId, null ) == null ) )
-        {
-            Conference conference = getVideobridge().createConference( null, "Openfire Meetings" );
-            conference.setLastKnownFocus( XMPPServer.getInstance().getServerInfo().getXMPPDomain() );
-            globalConferenceId = conference.getID();
-        }
-        else if ( !enabled && globalConferenceId != null )
-        {
-            globalConferenceId = null;
-            final Conference conference = getVideobridge().getConference( globalConferenceId, null );
-            if ( conference != null )
-            {
-                getVideobridge().expireConference( conference );
-            }
-        }
-
-        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.global.intercom", enabled ? "on" : "off" );
-    }
 
     //-------------------------------------------------------
 	//
