@@ -164,7 +164,6 @@
 
         final String focuspassword = request.getParameter( "focuspassword" );
         final String hqVoice = request.getParameter( "hqVoice" );
-        final boolean globalIntercom = ParamUtils.getBooleanParameter( request, "globalIntercom" );
 
         int channelLastN = -1;
         try {
@@ -210,8 +209,6 @@
             ofmeetConfig.setSimulcast( simulcast );
             ofmeetConfig.setAdaptiveSimulcast( adaptivesimulcast );
             ofmeetConfig.setFocusPassword( focuspassword );
-
-            container.configureGlobalIntercom( globalIntercom );
 
             container.populateJitsiSystemPropertiesWithJivePropertyValues();
 
@@ -337,12 +334,6 @@
             <tr>
                 <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.video.bandwidth"/>:</td>
                 <td><input type="text" size="10" maxlength="100" name="videobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", 512)}"></td>
-            </tr>
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="globalIntercom" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.global.intercom", false) ? "checked" : ""}>
-                    <fmt:message key="config.page.configuration.global.intercom"/>
-                </td>
             </tr>
         </table>
     </admin:contentBox>
