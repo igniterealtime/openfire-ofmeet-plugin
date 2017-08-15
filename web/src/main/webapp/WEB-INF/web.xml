@@ -21,7 +21,7 @@
 
 	<servlet-mapping>
 		<servlet-name>config</servlet-name>
-		<url-pattern>/jitsi-meet/config.js</url-pattern>
+		<url-pattern>/config.js</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -31,7 +31,7 @@
 
 	<servlet-mapping>
 		<servlet-name>interfaceConfig</servlet-name>
-		<url-pattern>/jitsi-meet/interface_config.js</url-pattern>
+		<url-pattern>/interface_config.js</url-pattern>
 	</servlet-mapping>
 
 	<filter>
@@ -41,8 +41,8 @@
 
 	<filter-mapping>
 		<filter-name>WatermarkFilter</filter-name>
-		<url-pattern>/jitsi-meet/images/watermark.png</url-pattern>
-		<url-pattern>/jitsi-meet/images/rightwatermark.png</url-pattern>
+		<url-pattern>/images/watermark.png</url-pattern>
+		<url-pattern>/images/rightwatermark.png</url-pattern>
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
@@ -53,7 +53,7 @@
 
 	<filter-mapping>
 		<filter-name>JitsiMeetRedirectFilter</filter-name>
-		<url-pattern>/jitsi-meet/*</url-pattern>
+		<url-pattern>/*</url-pattern>
 		<dispatcher>REQUEST</dispatcher>
 	</filter-mapping>
 	

@@ -59,9 +59,9 @@
                     <webResources>
                         <resource>
                             <!-- This is the outputDirectory of the download-maven-plugin execution. -->
-                            <directory>${project.build.directory}/upstream-jitsi-meet</directory>
+                            <directory>${project.build.directory}/upstream-jitsi-meet/jitsi-meet</directory>
                             <excludes>
-                                <exclude>jitsi-meet/index.html</exclude>
+                                <exclude>index.html</exclude>
                             </excludes>
                         </resource>
                     </webResources>
