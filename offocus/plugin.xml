@@ -22,6 +22,6 @@
     <description>${project.description}</description>
     <author>Ignite Realtime</author>
     <version>${project.version}</version>
-    <date>06/27/2017</date>
+    <date>08/15/2017</date>
     <minServerVersion>4.1.5</minServerVersion>
 </plugin>
