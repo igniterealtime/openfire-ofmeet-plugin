@@ -160,7 +160,7 @@ public class ConfigServlet extends HttpServlet
             config.put( "minHDHeight", minHDHeight );
             config.put( "desktopSharingFirefoxExtId", "jidesha@meet.jit.si" );
             config.put( "desktopSharingFirefoxDisabled", false );
-            config.put( "desktopSharingFirefoxMaxVersionExtRequired", -1 );
+            config.put( "desktopSharingFirefoxMaxVersionExtRequired", 51 );
             config.put( "desktopSharingFirefoxExtensionURL", request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/jidesha-0.1.1-fx.xpi");
             config.put( "desktopSharingFirefoxExtId", "jidesha@meet.jit.si" );
             config.put( "hiddenDomain", "recorder." + xmppDomain );
