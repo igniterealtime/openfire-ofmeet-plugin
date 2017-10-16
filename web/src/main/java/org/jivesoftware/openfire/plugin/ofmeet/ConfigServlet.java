@@ -153,10 +153,10 @@ public class ConfigServlet extends HttpServlet
             config.put( "clientNode", "http://igniterealtime.org/ofmeet/jitsi-meet/" );
             config.put( "focusUserJid", XMPPServer.getInstance().createJID( "focus", null ).toBareJID() );
             config.put( "defaultSipNumber", defaultSipNumber );
-            config.put( "desktopSharing", desktopSharing );
-            config.put( "chromeExtensionId", chromeExtensionId );
-            config.put( "desktopSharingSources", new JSONArray( desktopShareSrcs ) );
-            config.put( "minChromeExtVersion", minChromeExtVer );
+            config.put( "desktopSharingChromeMethod", desktopSharing );
+            config.put( "desktopSharingChromeExtId", chromeExtensionId );
+            config.put( "desktopSharingChromeSources", new JSONArray( desktopShareSrcs ) );
+            config.put( "desktopSharingChromeMinExtVersion", minChromeExtVer );
             config.put( "minHDHeight", minHDHeight );
             config.put( "desktopSharingFirefoxExtId", "jidesha@meet.jit.si" );
             config.put( "desktopSharingFirefoxDisabled", false );
