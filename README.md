@@ -7,7 +7,7 @@ This project produces two Openfire plugins, offocus and ofmeet, that, combined, 
 
 The OFMeet project bundles various third-party products, notably:
 - the [Jitsi Videobridge](https://github.com/jitsi/jitsi-videobridge) project;
-- the [Jitsi Conference Focus (jicofo)](https://github.com/jitsi/jitsi-meet) project; 
+- the [Jitsi Conference Focus (jicofo)](https://github.com/jitsi/jicofo) project; 
 - the [Jitsi Meet](https://github.com/jitsi/jitsi-meet) webclient.
 
 Installation
