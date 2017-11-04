@@ -444,4 +444,26 @@ public class OFMeetConfig
     {
         JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.startvideomuted" );
     }
+
+    public void setInviteOptions( List<String> options )
+    {
+        if (options == null || options.isEmpty() )
+        {
+            JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.inviteOptions" );
+        }
+        else
+        {
+            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.inviteOptions", options);
+        }
+    }
+
+    public List<String> getInviteOptions()
+    {
+        return JiveGlobals.getListProperty( "oorg.jitsi.videobridge.ofmeet.inviteOptions", Arrays.asList( "invite"  ) ); // "invite", "dialout", "addtocall"
+    }
+
+    public void resetInviteOptions()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.inviteOptions" );
+    }
 }

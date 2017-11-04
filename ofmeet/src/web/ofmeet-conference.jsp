@@ -29,6 +29,8 @@
 <%@ page import="org.jitsi.service.neomedia.MediaType" %>
 <%@ page import="org.jitsi.videobridge.Content" %>
 <%@ page import="java.net.URLEncoder" %>
+<%@ page import="org.jxmpp.jid.Jid" %>
+<%@ page import="org.jxmpp.jid.impl.JidCreate" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -46,7 +48,7 @@
 
     final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
     final Videobridge videobridge = container.getVideobridge();
-    final Conference conference = videobridge.getConference(confid, focus);
+    final Conference conference = videobridge.getConference( confid, JidCreate.bareFrom( focus ));
 
     if (conference == null) {
         response.sendRedirect("ofmeet-summary.jsp");

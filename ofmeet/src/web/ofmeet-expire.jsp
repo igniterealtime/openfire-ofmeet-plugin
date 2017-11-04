@@ -23,6 +23,7 @@
 %>
 <%@ page import="org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin" %>
 <%@ page import="org.jivesoftware.openfire.XMPPServer" %>
+<%@ page import="org.jxmpp.jid.impl.JidCreate" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -35,12 +36,11 @@
 
 	OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
 	Videobridge videobridge = container.getVideobridge();
-	Conference conference = videobridge.getConference(confid, focus);
+	Conference conference = videobridge.getConference( confid, JidCreate.bareFrom( focus ) );
 	
 	if (conference != null) {
 		conference.expire();
 	}
 	// Done, so redirect
 	response.sendRedirect("ofmeet-summary.jsp?deletesuccess=true");
-	return;
 %>

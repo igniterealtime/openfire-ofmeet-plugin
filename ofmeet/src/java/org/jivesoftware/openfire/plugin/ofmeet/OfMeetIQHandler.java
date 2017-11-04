@@ -14,6 +14,7 @@ import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jxmpp.jid.parts.Localpart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
@@ -81,9 +82,9 @@ public class OfMeetIQHandler extends IQHandler
 
             for (Conference conference : videobridge.getConferences())
             {
-                String room = conference.getName();
+                Localpart room = conference.getName();
 
-                if (room != null && !"".equals(room) && roomName.equals(room))
+                if (room != null && room.equals( Localpart.from(roomName) ))
                 {
                     JSONObject userJSON = new JSONObject();
                     userJSON.put("room", roomName);

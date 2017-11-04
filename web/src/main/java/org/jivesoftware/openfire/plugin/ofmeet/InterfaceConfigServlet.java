@@ -81,6 +81,8 @@ public class InterfaceConfigServlet extends HttpServlet
             config.put( "filmStripOnly",                         ofMeetConfig.getFilmstripOnly()      );
             config.put( "VERTICAL_FILMSTRIP",                    ofMeetConfig.getVerticalFilmstrip()  );
             config.put( "FILM_STRIP_MAX_HEIGHT",                 ofMeetConfig.getFilmstripMaxHeight() );
+            config.put( "INVITE_OPTIONS",                        new JSONArray( ofMeetConfig.getInviteOptions() ) );
+
 
             // Jitsi-meet appears to have replaced LOCAL_THUMBNAIL_RATIO_WIDTH and LOCAL_THUMBNAIL_RATIO_HEIGHT with a combined value in LOCAL_THUMBNAIL_RATIO.
             final int localThumbnailRatioWidth  = JiveGlobals.getIntProperty("org.jitsi.videobridge.ofmeet.local.thumbnail.ratio.width",16 );

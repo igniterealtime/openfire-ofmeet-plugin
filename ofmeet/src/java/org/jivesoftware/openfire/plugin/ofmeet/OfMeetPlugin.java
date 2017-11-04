@@ -149,7 +149,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 			Log.info("OfMeet Plugin - Initialize email listener");
 
 			checkDownloadFolder(pluginDirectory);
-        	EmailListener.getInstance().start();
 
 			Log.info("OfMeet Plugin - Initialize IQ handler ");
 
@@ -221,7 +220,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
 
         ClusterManager.removeListener(this);
-        EmailListener.getInstance().stop();
     }
 
     protected void loadPublicWebApp() throws Exception
