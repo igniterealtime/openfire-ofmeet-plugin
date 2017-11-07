@@ -459,7 +459,7 @@ public class OFMeetConfig
 
     public List<String> getInviteOptions()
     {
-        return JiveGlobals.getListProperty( "oorg.jitsi.videobridge.ofmeet.inviteOptions", Arrays.asList( "invite"  ) ); // "invite", "dialout", "addtocall"
+        return JiveGlobals.getListProperty( "org.jitsi.videobridge.ofmeet.inviteOptions", Arrays.asList( "invite"  ) ); // "invite", "dialout", "addtocall"
     }
 
     public void resetInviteOptions()
