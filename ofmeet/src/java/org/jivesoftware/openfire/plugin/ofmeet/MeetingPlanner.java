@@ -62,8 +62,9 @@ public class MeetingPlanner implements Job
                 if (XMPPServer.getInstance().getPluginManager().getPlugin("bookmarks") == null)
                 {
                     Log.debug( "Skipping the periodic execution, as the 'bookmarks' plugin is not loaded." );
+                } else {
+                    processMeetingPlanner();
                 }
-                processMeetingPlanner();
             }
 
         }, 0,  900000);
