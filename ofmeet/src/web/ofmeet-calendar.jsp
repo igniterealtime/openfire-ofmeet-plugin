@@ -1,6 +1,6 @@
 <%--
-  -	$Revision$
-  -	$Date$
+  - $Revision$
+  - $Date$
   -
   - Copyright (C) 2004-2008 Jive Software. All rights reserved.
   -
@@ -32,51 +32,62 @@
     String roomId = ParamUtils.getParameter(request,"room");    
     String bookmarkId = ParamUtils.getParameter(request,"id"); 
     String updatedEvents = ParamUtils.getParameter(request,"calendarevents");
+    String quartz = ParamUtils.getParameter(request,"quartz");      
 
     String users = "[";
     String groups = "[";
     
     Bookmark bookmark = null;
-	
+    
     try {
     
-    	if (bookmarkId != null)
-    	{
-		bookmark = BookmarkManager.getBookmark(Long.parseLong(bookmarkId)); 
+        if (bookmarkId != null)
+        {
+            bookmark = BookmarkManager.getBookmark(Long.parseLong(bookmarkId)); 
 
-		if (updatedEvents != null)
-		{
-			bookmark.setProperty("calendar", updatedEvents);
-            MeetingPlanner.processMeetingPlanner();
-		}
+            if (updatedEvents != null && !"".equals(updatedEvents))
+            {
+                bookmark.setProperty("calendar", updatedEvents);
+                MeetingPlanner.processMeetingPlanner();
+            }
 
-		int i = 0;
-		int count = bookmark.getUsers().size();
+            if (quartz != null)
+            {
+                String old = bookmark.getProperty("quartz"); 
 
-		int j = 0;
-		int count2 = bookmark.getGroups().size();    
+                if (old == null || (old != null && old.equals(quartz) == false))
+                {
+                    String resp = MeetingPlanner.processMeetingCron(bookmark, quartz, old);     
+                }   
+            }
+
+            int i = 0;
+            int count = bookmark.getUsers().size();
+
+            int j = 0;
+            int count2 = bookmark.getGroups().size();    
 
 
-		for (String user : bookmark.getUsers())
-		{   
-			users = users + "'" + user + "'";
-			i++;
+            for (String user : bookmark.getUsers())
+            {   
+                users = users + "'" + user + "'";
+                i++;
 
-			if (i < count) users = users + ",";
-		}
+                if (i < count) users = users + ",";
+            }
 
-		for (String group : bookmark.getGroups())
-		{   
-			groups = groups + "'" + group + "'";
-			j++;
+            for (String group : bookmark.getGroups())
+            {   
+                groups = groups + "'" + group + "'";
+                j++;
 
-			if (j < count2) groups = groups + ",";
-		}
-	}
-	
-	users = users + "]";	
-	groups = groups + "]";	
-    	
+                if (j < count2) groups = groups + ",";
+            }
+        }
+    
+        users = users + "]";    
+        groups = groups + "]";  
+        
     } catch (Exception e) {}
      
 %>
@@ -89,6 +100,7 @@
     <link rel="stylesheet" href="vendor/fullcalendar.css"/>
     <link rel="stylesheet" href="stylesheets/workshop_manager.css">
     <link rel="stylesheet" href="vendor/foundation.css">
+    <link rel="stylesheet" href="stylesheets/jquery-cron.css">    
 
     <script src="vendor/modernizr.js"></script>
     <script src="vendor/moment.min.js"></script>
@@ -98,39 +110,71 @@
     <script src="vendor/fullcalendar.js"></script>
     <script src="vendor/jquery.ui.touch-punch.js"></script>
     <script src="vendor/fastclick.js"></script>
+    <script src="vendor/jquery-cron.js"></script>    
     <script src="javascripts/workshop_manager.js"></script>
     <script src="javascripts/main.js"></script>
     <script>
-    	var roomName = "<%= roomName %>";
-    	var roomId = "<%= roomId %>";    
-    	var users = <%= users %>;    	
-    	var groups = <%= groups %>; 
+        var roomName = "<%= roomName %>";
+        var roomId = "<%= roomId %>";    
+        var users = <%= users %>;       
+        var groups = <%= groups %>; 
 <%
-	String events = "[]";
-	
-	if (bookmark != null)
-	{
-		events = bookmark.getProperty("calendar");		
-		if (events == null) events = "[]";
-	}
+        String events = "[]";
+        String trigger = "";    
+
+        if (bookmark != null)
+        {
+            events = bookmark.getProperty("calendar");    
+            trigger = bookmark.getProperty("quartz");           
+
+            if (events == null) events = "[]";
+            if (trigger == null) trigger = ""; 
+        }
 %>
-	var DATA = {events: <%= events %>};
+        $(document).ready(function() 
+        {   
+            var today = new Date();
+            var cronFormat = "0 "+today.getMinutes()+" "+today.getHours()+" "+today.getDate()+" "+(today.getMonth()+1)+" ? *";
+        
+            $('#cron_container').cron({
+              initial: cronFormat,
+              useGentleSelect:false
+            });
+        });        
+
+    var DATA = {events: <%= events %>};
     </script>
   </head>
   <body>
+   <form action='ofmeet-calendar.jsp' id='calendarform' name='calendarform' method='post'>  
    <h1><%= roomName %></h1>
    <p>
     <fmt:message key="ofmeet.calendar.description" />
    </p> 
    <hr />
-    <div id="container" class="row">
-      <div id="workshop_manager" class="small-12 columns"></div>
-    </div>
-    <form action='ofmeet-calendar.jsp' id='calendarform' method='post'>
-    	<input type='hidden' id='calendarevents' 	name='calendarevents'>
-    	<input type='hidden' id='name' 			name='name' 	value='<%= roomName %>'>    
-    	<input type='hidden' id='room' 			name='room' 	value='<%= roomId %>'>   
-    	<input type='hidden' id='id' 			name='id' 	value='<%= bookmarkId %>'>      	
-    </form>
-  </body>
+   <table width="100%"><tr>
+    <td width="85%">
+        <div id="container" class="row">
+          <div id="workshop_manager" class="small-12 columns"></div>
+        </div>
+    </td>
+    <td>
+        <input type='hidden' id='calendarevents'    name='calendarevents'>
+        <input type='hidden' id='name'          name='name'     value='<%= roomName %>'>    
+        <input type='hidden' id='room'          name='room'     value='<%= roomId %>'>   
+        <input type='hidden' id='id'            name='id'   value='<%= bookmarkId %>'> 
+        <div>
+         <span id='cron_container' ></span>
+         <input type="button" value="Generate" onclick="$('#quartz').val($('#cron_container').cron('value'));" />         
+        </div>
+    </td>
+   </tr></table> 
+   <div>
+        Quartz Cron Trigger&nbsp;<a target="_blank" href="http://www.quartz-scheduler.org/documentation/quartz-2.x/tutorials/crontrigger.html">&nbsp;?&nbsp;</a>
+        <input type="text" id="quartz" name="quartz" placeholder="0 15 10 * * ? 2017 (Fire at 10:15am every day during the year 2017)" value='<%= trigger %>' />
+        <input type="button" value="Accept" onclick="document.calendarform.submit()" />    
+        <input type="button" value="Cancel" onclick="$('#quartz').val('delete');document.calendarform.submit()" />            
+   </div>   
+  </form>
+ </body>
 </html>
