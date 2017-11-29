@@ -30,6 +30,8 @@ import org.ice4j.ice.harvest.MappingCandidateHarvesters;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
 import org.jitsi.videobridge.Videobridge;
+import org.jitsi.videobridge.Conference;
+import org.jitsi.videobridge.Content;
 import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
@@ -82,23 +84,23 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public boolean restartNeeded = false;
 
-	private PluginManager manager;
-	public File pluginDirectory;
+    private PluginManager manager;
+    public File pluginDirectory;
 
     private OfMeetIQHandler ofmeetIQHandler;
-	private WebAppContext publicWebApp;
+    private WebAppContext publicWebApp;
 
-	private final JitsiPluginWrapper jitsiPluginWrapper;
+    private final JitsiPluginWrapper jitsiPluginWrapper;
     private final MeetingPlanner meetingPlanner;
 
     public OfMeetPlugin()
-	{
-		jitsiPluginWrapper = new JitsiPluginWrapper();
+    {
+        jitsiPluginWrapper = new JitsiPluginWrapper();
         meetingPlanner = new MeetingPlanner();
-	}
+    }
 
-	public String getName()
-	{
+    public String getName()
+    {
         return "ofmeet";
     }
 
@@ -107,23 +109,23 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return "OfMeet Plugin";
     }
 
-	public void initializePlugin(final PluginManager manager, final File pluginDirectory)
+    public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
-		this.manager = manager;
-		this.pluginDirectory = pluginDirectory;
+        this.manager = manager;
+        this.pluginDirectory = pluginDirectory;
 
-		// Initialize all Jitsi software, which provided the video-conferencing functionality.
-		try
-		{
-			populateJitsiSystemPropertiesWithJivePropertyValues();
-			jitsiPluginWrapper.initialize( manager, pluginDirectory );
-		}
-		catch ( Exception ex )
-		{
-			Log.error( "An exception occurred while attempting to initialize the Jitsi components.", ex );
-		}
+        // Initialize all Jitsi software, which provided the video-conferencing functionality.
+        try
+        {
+            populateJitsiSystemPropertiesWithJivePropertyValues();
+            jitsiPluginWrapper.initialize( manager, pluginDirectory );
+        }
+        catch ( Exception ex )
+        {
+            Log.error( "An exception occurred while attempting to initialize the Jitsi components.", ex );
+        }
 
-		// Initialize our own additional functinality providers.
+        // Initialize our own additional functinality providers.
         try
         {
             meetingPlanner.initialize();
@@ -134,51 +136,51 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
 
         try
-		{
-			loadPublicWebApp();
-		}
-		catch ( Exception ex )
-		{
-			Log.error( "An exception occurred while attempting to load the public web application.", ex );
-		}
+        {
+            loadPublicWebApp();
+        }
+        catch ( Exception ex )
+        {
+            Log.error( "An exception occurred while attempting to load the public web application.", ex );
+        }
 
-		try
-		{
-			ClusterManager.addListener(this);
+        try
+        {
+            ClusterManager.addListener(this);
 
-			Log.info("OfMeet Plugin - Initialize email listener");
+            Log.info("OfMeet Plugin - Initialize email listener");
 
-			checkDownloadFolder(pluginDirectory);
+            checkDownloadFolder(pluginDirectory);
 
-			Log.info("OfMeet Plugin - Initialize IQ handler ");
+            Log.info("OfMeet Plugin - Initialize IQ handler ");
 
-			ofmeetIQHandler = new OfMeetIQHandler( getVideobridge() );
-			XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
+            ofmeetIQHandler = new OfMeetIQHandler( getVideobridge() );
+            XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
 
-        	SessionEventDispatcher.addListener(this);
+            SessionEventDispatcher.addListener(this);
 
             PropertyEventDispatcher.addListener( this );
-		}
-		catch (Exception e) {
-			Log.error("Could NOT start open fire meetings", e);
-		}
+        }
+        catch (Exception e) {
+            Log.error("Could NOT start open fire meetings", e);
+        }
 
-		Security.addProvider( new OfMeetSaslProvider() );
-		SASLAuthentication.addSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
+        Security.addProvider( new OfMeetSaslProvider() );
+        SASLAuthentication.addSupportedMechanism( OfMeetSaslServer.MECHANISM_NAME );
     }
 
-	public void destroyPlugin()
+    public void destroyPlugin()
     {
         PropertyEventDispatcher.removeListener( this );
 
         try
-		{
-			unloadPublicWebApp();
-		}
-		catch ( Exception ex )
-		{
-			Log.error( "An exception occurred while trying to unload the public web application of OFMeet.", ex );
-		}
+        {
+            unloadPublicWebApp();
+        }
+        catch ( Exception ex )
+        {
+            Log.error( "An exception occurred while trying to unload the public web application of OFMeet.", ex );
+        }
 
         try
         {
@@ -223,70 +225,70 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     }
 
     protected void loadPublicWebApp() throws Exception
-	{
-		Log.info( "Initializing public web application" );
+    {
+        Log.info( "Initializing public web application" );
 
-		Log.debug( "Identify the name of the web archive file that contains the public web application." );
-		final File libs = new File(pluginDirectory.getPath() + File.separator + "lib");
-		final File[] matchingFiles = libs.listFiles( new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return name.toLowerCase().startsWith("web-") && name.toLowerCase().endsWith(".war");
-			}
-		});
+        Log.debug( "Identify the name of the web archive file that contains the public web application." );
+        final File libs = new File(pluginDirectory.getPath() + File.separator + "lib");
+        final File[] matchingFiles = libs.listFiles( new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().startsWith("web-") && name.toLowerCase().endsWith(".war");
+            }
+        });
 
-		final File webApp;
-		switch ( matchingFiles.length )
-		{
-			case 0:
-				Log.error( "Unable to find public web application archive for OFMeet!" );
-				return;
+        final File webApp;
+        switch ( matchingFiles.length )
+        {
+            case 0:
+                Log.error( "Unable to find public web application archive for OFMeet!" );
+                return;
 
-			default:
-				Log.warn( "Found more than one public web application archive for OFMeet. Using an arbitrary one." );
-				// intended fall-through.
+            default:
+                Log.warn( "Found more than one public web application archive for OFMeet. Using an arbitrary one." );
+                // intended fall-through.
 
-			case 1:
-				webApp = matchingFiles[0];
-				Log.debug( "Using this archive: {}", webApp );
-		}
+            case 1:
+                webApp = matchingFiles[0];
+                Log.debug( "Using this archive: {}", webApp );
+        }
 
-		Log.debug( "Creating new WebAppContext for the public web application." );
+        Log.debug( "Creating new WebAppContext for the public web application." );
 
 
-		publicWebApp = new WebAppContext();
-		publicWebApp.setWar( webApp.getAbsolutePath() );
-		publicWebApp.setContextPath( new OFMeetConfig().getWebappContextPath() );
+        publicWebApp = new WebAppContext();
+        publicWebApp.setWar( webApp.getAbsolutePath() );
+        publicWebApp.setContextPath( new OFMeetConfig().getWebappContextPath() );
 
-		Log.debug( "Making WebAppContext available on HttpBindManager context." );
-		HttpBindManager.getInstance().addJettyHandler( publicWebApp );
+        Log.debug( "Making WebAppContext available on HttpBindManager context." );
+        HttpBindManager.getInstance().addJettyHandler( publicWebApp );
 
 // No longer needed? Jitsi Meet now checks if the XMPP server supports anonymous authentication, and will prompt for a login otherwise.
 //            if ( JiveGlobals.getBooleanProperty("ofmeet.security.enabled", true ) )
-//			{
-//				Log.info("OfMeet Plugin - Initialize security");
-//				context.setSecurityHandler(basicAuth("ofmeet"));
-//			}
+//          {
+//              Log.info("OfMeet Plugin - Initialize security");
+//              context.setSecurityHandler(basicAuth("ofmeet"));
+//          }
 
-		Log.debug( "Initialized public web application", publicWebApp.toString() );
-	}
+        Log.debug( "Initialized public web application", publicWebApp.toString() );
+    }
 
-	public void unloadPublicWebApp() throws Exception
-	{
-		if ( publicWebApp != null )
-		{
-			try
-			{
-				HttpBindManager.getInstance().removeJettyHandler( publicWebApp );
-				publicWebApp.destroy();
-			}
-			finally
-			{
-				publicWebApp = null;
-			}
-		}
-	}
+    public void unloadPublicWebApp() throws Exception
+    {
+        if ( publicWebApp != null )
+        {
+            try
+            {
+                HttpBindManager.getInstance().removeJettyHandler( publicWebApp );
+                publicWebApp.destroy();
+            }
+            finally
+            {
+                publicWebApp = null;
+            }
+        }
+    }
 
-	public URL getWebappURL()
+    public URL getWebappURL()
     {
         try
         {
@@ -312,68 +314,68 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
     }
 
-	/**
-	 * Jitsi takes most of its configuration through system properties. This method sets these
-	 * properties, using values defined in JiveGlobals.
-	 */
-	public void populateJitsiSystemPropertiesWithJivePropertyValues()
-	{
+    /**
+     * Jitsi takes most of its configuration through system properties. This method sets these
+     * properties, using values defined in JiveGlobals.
+     */
+    public void populateJitsiSystemPropertiesWithJivePropertyValues()
+    {
         // MAX/MIN_PORT_DEFAULT_VALUE: Instead of 5000-6000 (jitsi's default) use something that does not clash with default XMPP port numbers.
         System.setProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, JiveGlobals.getProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, "50000" ) );
         System.setProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, JiveGlobals.getProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, "60000" ) );
 
-		System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_LOCATION",  pluginDirectory.getAbsolutePath() );
-		System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "." );
-		System.setProperty( "net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath() );
-		System.setProperty( "net.java.sip.communicator.SC_LOG_DIR_LOCATION",   pluginDirectory.getAbsolutePath() );
+        System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_LOCATION",  pluginDirectory.getAbsolutePath() );
+        System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "." );
+        System.setProperty( "net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath() );
+        System.setProperty( "net.java.sip.communicator.SC_LOG_DIR_LOCATION",   pluginDirectory.getAbsolutePath() );
 
-		System.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,                 JiveGlobals.getProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,     "false" ) );
+        System.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,                 JiveGlobals.getProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME,     "false" ) );
 
-		// Set up the NAT harvester, but only when needed.
-		final InetAddress natPublic = new OFMeetConfig().getPublicNATAddress();
-		if ( natPublic == null )
-		{
-			System.clearProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME );
-		}
-		else
-		{
-			System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, natPublic.getHostAddress() );
-		}
+        // Set up the NAT harvester, but only when needed.
+        final InetAddress natPublic = new OFMeetConfig().getPublicNATAddress();
+        if ( natPublic == null )
+        {
+            System.clearProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME );
+        }
+        else
+        {
+            System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME, natPublic.getHostAddress() );
+        }
 
-		final InetAddress natLocal = new OFMeetConfig().getLocalNATAddress();
-		if ( natLocal == null )
-		{
-			System.clearProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME );
-		}
-		else
-		{
-			System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, natLocal.getHostAddress() );
-		}
+        final InetAddress natLocal = new OFMeetConfig().getLocalNATAddress();
+        if ( natLocal == null )
+        {
+            System.clearProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME );
+        }
+        else
+        {
+            System.setProperty( MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME, natLocal.getHostAddress() );
+        }
 
-		final List<String> stunMappingHarversterAddresses = new OFMeetConfig().getStunMappingHarversterAddresses();
-		if ( stunMappingHarversterAddresses == null || stunMappingHarversterAddresses.isEmpty() )
-		{
-			System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
-		}
-		else
-		{
-			// Concat into comma-separated string.
-			final StringBuilder sb = new StringBuilder();
-			for ( final String address : stunMappingHarversterAddresses )
-			{
-				sb.append( address );
-				sb.append( "," );
-			}
-			System.setProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, sb.substring( 0, sb.length() - 1 ) );
-		}
+        final List<String> stunMappingHarversterAddresses = new OFMeetConfig().getStunMappingHarversterAddresses();
+        if ( stunMappingHarversterAddresses == null || stunMappingHarversterAddresses.isEmpty() )
+        {
+            System.clearProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME );
+        }
+        else
+        {
+            // Concat into comma-separated string.
+            final StringBuilder sb = new StringBuilder();
+            for ( final String address : stunMappingHarversterAddresses )
+            {
+                sb.append( address );
+                sb.append( "," );
+            }
+            System.setProperty( MappingCandidateHarvesters.STUN_MAPPING_HARVESTER_ADDRESSES_PNAME, sb.substring( 0, sb.length() - 1 ) );
+        }
 
-		// allow videobridge access without focus
-		System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" );
-	}
+        // allow videobridge access without focus
+        System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" );
+    }
 
-	private static final SecurityHandler basicAuth(String realm) {
+    private static final SecurityHandler basicAuth(String realm) {
 
-    	final OfMeetLoginService loginService = new OfMeetLoginService();
+        final OfMeetLoginService loginService = new OfMeetLoginService();
         loginService.setName(realm);
 
         final Constraint constraint = new Constraint();
@@ -396,50 +398,50 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private void checkDownloadFolder(File pluginDirectory)
     {
-		String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
+        String ofmeetHome = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn";
 
         try
         {
-			File ofmeetFolderPath = new File(ofmeetHome);
+            File ofmeetFolderPath = new File(ofmeetHome);
 
             if(!ofmeetFolderPath.exists())
             {
                 ofmeetFolderPath.mkdirs();
 
-			}
+            }
 
-			List<String> lines = Arrays.asList("Move on, nothing here....");
-			Path file = Paths.get(ofmeetHome + File.separator + "index.html");
-			Files.write(file, lines, Charset.forName("UTF-8"));
+            List<String> lines = Arrays.asList("Move on, nothing here....");
+            Path file = Paths.get(ofmeetHome + File.separator + "index.html");
+            Files.write(file, lines, Charset.forName("UTF-8"));
 
-			File downloadHome = new File(ofmeetHome + File.separator + "download");
+            File downloadHome = new File(ofmeetHome + File.separator + "download");
 
             if(!downloadHome.exists())
             {
                 downloadHome.mkdirs();
 
-			}
+            }
 
-			lines = Arrays.asList("Move on, nothing here....");
-			file = Paths.get(downloadHome + File.separator + "index.html");
-			Files.write(file, lines, Charset.forName("UTF-8"));
+            lines = Arrays.asList("Move on, nothing here....");
+            file = Paths.get(downloadHome + File.separator + "index.html");
+            Files.write(file, lines, Charset.forName("UTF-8"));
         }
         catch (Exception e)
         {
             Log.error("checkDownloadFolder", e);
         }
-	}
+    }
 
     //-------------------------------------------------------
-	//
-	//		clustering
-	//
-	//-------------------------------------------------------
+    //
+    //      clustering
+    //
+    //-------------------------------------------------------
 
-	@Override
-	public void joinedCluster()
-	{
-		Log.info("OfMeet Plugin - joinedCluster");
+    @Override
+    public void joinedCluster()
+    {
+        Log.info("OfMeet Plugin - joinedCluster");
         try
         {
             jitsiPluginWrapper.destroy();
@@ -448,17 +450,17 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             Log.error( "An exception occurred while trying to destroy the Jitsi Plugin.", ex );
         }
-	}
+    }
 
-	@Override
-	public void joinedCluster(byte[] arg0)
-	{
-	}
+    @Override
+    public void joinedCluster(byte[] arg0)
+    {
+    }
 
-	@Override
-	public void leftCluster()
-	{
-		Log.info("OfMeet Plugin - leftCluster");
+    @Override
+    public void leftCluster()
+    {
+        Log.info("OfMeet Plugin - leftCluster");
         try
         {
             jitsiPluginWrapper.initialize( manager, pluginDirectory );
@@ -467,17 +469,17 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             Log.error( "An exception occurred while trying to initialize the Jitsi Plugin.", ex );
         }
-	}
+    }
 
-	@Override
-	public void leftCluster(byte[] arg0)
-	{
-	}
+    @Override
+    public void leftCluster(byte[] arg0)
+    {
+    }
 
-	@Override
-	public void markedAsSeniorClusterMember()
-	{
-		Log.info("OfMeet Plugin - markedAsSeniorClusterMember");
+    @Override
+    public void markedAsSeniorClusterMember()
+    {
+        Log.info("OfMeet Plugin - markedAsSeniorClusterMember");
         try
         {
             jitsiPluginWrapper.initialize( manager, pluginDirectory );
@@ -493,53 +495,82 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         return this.jitsiPluginWrapper.getVideobridge();
     }
 
-	//-------------------------------------------------------
-	//
-	//		session management
-	//
-	//-------------------------------------------------------
+    public void setRecording(String roomName, String path)
+    {
+        Videobridge videobridge = getVideobridge();
 
-	public void anonymousSessionCreated(Session session)
-	{
-		Log.debug("OfMeet Plugin -  anonymousSessionCreated "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
-	}
+        if (path == null)
+        {
+            path = JiveGlobals.getHomeDirectory() + File.separator + "resources" + File.separator + "spank" + File.separator + "ofmeet-cdn"  + File.separator + "download";
+        }
 
-	public void anonymousSessionDestroyed(Session session)
-	{
-		Log.debug("OfMeet Plugin -  anonymousSessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
-	}
+        for (Conference conference : videobridge.getConferences())
+        {
+            String room = conference.getName().toString();
 
-	public void resourceBound(Session session)
-	{
-		Log.debug("OfMeet Plugin -  resourceBound "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
-	}
+            if (room != null && !"".equals(room) && roomName.equals(room))
+            {
+                for (Content content : conference.getContents())
+                {
+                    if (content != null && !content.isExpired() && !content.isRecording() && !"data".equals(content.getMediaType().toString()))
+                    {
+                        Log.info("set videobridge recording " + roomName + " " + content.getMediaType().toString() + " " + path);
+                        content.setRecording(true, path);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
 
-	public void sessionCreated(Session session)
-	{
-		Log.debug("OfMeet Plugin -  sessionCreated "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
-	}
+    //-------------------------------------------------------
+    //
+    //      session management
+    //
+    //-------------------------------------------------------
 
-	public void sessionDestroyed(Session session)
-	{
-		Log.debug("OfMeet Plugin -  sessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+    public void anonymousSessionCreated(Session session)
+    {
+        Log.debug("OfMeet Plugin -  anonymousSessionCreated "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+    }
 
-		boolean skypeAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofskype") != null;
+    public void anonymousSessionDestroyed(Session session)
+    {
+        Log.debug("OfMeet Plugin -  anonymousSessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+    }
 
-		if (OfMeetAzure.skypeids.containsKey(session.getAddress().getNode()))
-		{
-			String sipuri = OfMeetAzure.skypeids.remove(session.getAddress().getNode());
+    public void resourceBound(Session session)
+    {
+        Log.debug("OfMeet Plugin -  resourceBound "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+    }
 
-			IQ iq = new IQ(IQ.Type.set);
-			iq.setFrom(session.getAddress());
-			iq.setTo(XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+    public void sessionCreated(Session session)
+    {
+        Log.debug("OfMeet Plugin -  sessionCreated "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
+    }
 
-			Element child = iq.setChildElement("request", "http://igniterealtime.org/protocol/ofskype");
-			child.setText("{'action':'stop_skype_user', 'sipuri':'" + sipuri + "'}");
-			XMPPServer.getInstance().getIQRouter().route(iq);
+    public void sessionDestroyed(Session session)
+    {
+        Log.debug("OfMeet Plugin -  sessionDestroyed "+ session.getAddress().toString() + "\n" + ((ClientSession) session).getPresence().toXML());
 
-			Log.info("OfMeet Plugin - closing skype session " + sipuri);
-		}
-	}
+        boolean skypeAvailable = XMPPServer.getInstance().getPluginManager().getPlugin("ofskype") != null;
+
+        if (OfMeetAzure.skypeids.containsKey(session.getAddress().getNode()))
+        {
+            String sipuri = OfMeetAzure.skypeids.remove(session.getAddress().getNode());
+
+            IQ iq = new IQ(IQ.Type.set);
+            iq.setFrom(session.getAddress());
+            iq.setTo(XMPPServer.getInstance().getServerInfo().getXMPPDomain());
+
+            Element child = iq.setChildElement("request", "http://igniterealtime.org/protocol/ofskype");
+            child.setText("{'action':'stop_skype_user', 'sipuri':'" + sipuri + "'}");
+            XMPPServer.getInstance().getIQRouter().route(iq);
+
+            Log.info("OfMeet Plugin - closing skype session " + sipuri);
+        }
+    }
 
     @Override
     public void propertySet( String s, Map<String, Object> map )
