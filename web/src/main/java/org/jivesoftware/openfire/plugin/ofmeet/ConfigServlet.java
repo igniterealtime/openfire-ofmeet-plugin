@@ -126,6 +126,15 @@ public class ConfigServlet extends HttpServlet
             hosts.put( "focus", "focus." + xmppDomain );
             config.put( "hosts", hosts );
 
+            final Map<String, Object> p2p = new HashMap<>();
+            p2p.put( "enabled", ofMeetConfig.getP2pEnabled() );
+            p2p.put( "preferH264", ofMeetConfig.getP2pPreferH264() );
+            p2p.put( "disableH264", ofMeetConfig.getP2pDisableH264() );
+            p2p.put( "useStunTurn", ofMeetConfig.getP2pUseStunTurn() );
+            config.put( "p2p", p2p );
+            // TODO
+            //if ( ofMeetConfig.getP2pStunServers() != null && !ofMeetConfig.getP2pStunServers().isEmpty() )
+            //p2p.put( "stunServers", ofMeetConfig.getP2pStunServers() );
 
             if ( iceServers != null && !iceServers.trim().isEmpty() )
             {
@@ -196,6 +205,9 @@ public class ConfigServlet extends HttpServlet
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
             config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );
+
+            config.put( "webrtcIceUdpDisable", ofMeetConfig.getWebrtcIceUdpDisable() );
+            config.put( "webrtcIceTcpDisable", ofMeetConfig.getWebrtcIceTcpDisable() );
 
             // TODO: find out if both of the settings below are in use (seems silly).
             config.put( "adaptiveSimulcast", ofMeetConfig.getAdaptiveSimulcast() );
