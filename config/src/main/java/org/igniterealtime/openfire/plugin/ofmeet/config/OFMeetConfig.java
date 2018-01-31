@@ -190,7 +190,7 @@ public class OFMeetConfig
     {
         // These should match the implementations that are provided in the defaultToolbarButtons.js file in jitsi-meet.
         // The order of this list is used as the default ordering of the buttons.
-        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "fodeviceselection", "hangup", "profile", "contacts", "info", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "videoquality", "filmstrip" ) );
     }
 
     public void resetButtonsImplemented()
@@ -205,7 +205,7 @@ public class OFMeetConfig
 
     public List<String> getButtonsEnabled()
     {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup", "profile", "contacts", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "fodeviceselection", "hangup", "profile", "contacts", "info", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "videoquality", "filmstrip" ) );
     }
 
     public void resetButtonsEnabled()
@@ -220,7 +220,7 @@ public class OFMeetConfig
 
     public List<String> getButtonsOnTop()
     {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.onTop", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "hangup" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.onTop", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "fodeviceselection", "hangup" ) );
     }
 
     public void resetButtonsOnTop()
