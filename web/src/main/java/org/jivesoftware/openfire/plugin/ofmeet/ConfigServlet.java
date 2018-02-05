@@ -26,6 +26,7 @@ package org.jivesoftware.openfire.plugin.ofmeet;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.Version;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -272,6 +273,10 @@ public class ConfigServlet extends HttpServlet
      * This method will verify if the websocket plugin is available. If it is, the websocket endpoint is returned. When
      * websocket is not available, the http-bind endpoint is returned.
      *
+     * Since Openfire version 4.2.0 (OF-1339) the websocket functionality that was previously provided by a plugin, was
+     * merged with the core Openfire code. After version 4.2.1, there is no need to check for the presence of the
+     * plugin.
+     *
      * The request that is made to this servlet is used to determine if the client prefers secure/encrypted connections
      * (https, wss) over plain ones (http, ws), and to determine what the server address and port is.
      *
@@ -282,9 +287,10 @@ public class ConfigServlet extends HttpServlet
     public static URI getMostPreferredConnectionURL( HttpServletRequest request ) throws URISyntaxException
     {
         Log.debug( "[{}] Generating BOSH URL based on {}", request.getRemoteAddr(), request.getRequestURL() );
-        if ( XMPPServer.getInstance().getPluginManager().getPlugin( "websocket" ) != null )
+        final boolean webSocketInCore = !new Version(4, 2, 0, null, -1 ).isNewerThan( XMPPServer.getInstance().getServerInfo().getVersion() );
+        if ( webSocketInCore || XMPPServer.getInstance().getPluginManager().getPlugin( "websocket" ) != null )
         {
-            Log.debug( "[{}] Websocket plugin is available. Returning a websocket address.", request.getRemoteAddr() );
+            Log.debug( "[{}] Websocket functionality is available. Returning a websocket address.", request.getRemoteAddr() );
             final String websocketScheme;
             if ( request.getScheme().endsWith( "s" ) )
             {
@@ -299,7 +305,7 @@ public class ConfigServlet extends HttpServlet
         }
         else
         {
-            Log.debug( "[{}] No Websocket plugin available. Returning an HTTP-BIND address.", request.getRemoteAddr() );
+            Log.debug( "[{}] No Websocket functionality available. Returning an HTTP-BIND address.", request.getRemoteAddr() );
             return new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null);
         }
     }
