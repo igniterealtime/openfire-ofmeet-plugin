@@ -41,7 +41,7 @@
 
     <div class="div-border" style="padding: 12px; width: 95%;">
         <table class="jive-table" cellspacing="0" width="100%">
-            <th><fmt:message key="ofmeet.planner.name" /></th><th><fmt:message key="ofmeet.planner.url"/></th><th><fmt:message key="ofmeet.planner.address"/></th><th><fmt:message key="ofmeet.planner.users" /></th><th><fmt:message key="ofmeet.planner.groups" /></th>
+            <th><fmt:message key="ofmeet.planner.name" /></th><th><fmt:message key="ofmeet.planner.url"/></th><th><fmt:message key="ofmeet.planner.quartz"/></th><th><fmt:message key="ofmeet.planner.users" /></th><th><fmt:message key="ofmeet.planner.groups" /></th>
             <%
                 boolean hasBookmarks = false;
                 
@@ -64,41 +64,51 @@
                             groups = bookmark.getGroups().size() + " "+LocaleUtils.getLocalizedString("ofmeet.planner.groups", "ofmeet");
                         }
                     }
-		    
-		    String room = (new JID(bookmark.getValue())).getNode();
-		    String roomHtml = "<a href='ofmeet-calendar.jsp?room=" + room + "&name=" + bookmark.getName() + "&id=" + bookmark.getBookmarkID() + "'>" + bookmark.getName() + "</a>";  
-		    
-		    String url = bookmark.getProperty("url");
+            
+                    String room = (new JID(bookmark.getValue())).getNode();
+                    String roomHtml = "<a href='ofmeet-calendar.jsp?room=" + room + "&name=" + bookmark.getName() + "&id=" + bookmark.getBookmarkID() + "'>" + bookmark.getName() + "</a>";  
 
-		    if (url == null)
-		    {
-			String id = bookmark.getBookmarkID() + "-" + System.currentTimeMillis();
-			url = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/?b=" + id;
-			bookmark.setProperty("url", url);
-		    }	
-		    
-		    String urlHtml = "<a target='_blank' href='" + url + "'>" + url + "</a>";  		    
-		    
-		    if (!"All".equals(users))
-		    {
-            %>
-			    <tr style="border-left: none;">
-				<td><%= roomHtml%></td>
-				<td><%= urlHtml%></td>				
-				<td><%= bookmark.getValue()%></td>
-				<td><%= users%></td>
-				<td><%= groups%></td>
-			    </tr>
-            	 <% } %>			    
-            <% } %>
+                    String url = bookmark.getProperty("url");
 
-            <% if (!hasBookmarks) { %>
-            <tr>
-                <td colspan="4" align="center"><fmt:message key="ofmeet.planner.none" /></td>
-            </tr>
-            <%} %>
+                    if (url == null || url.contains("?b="))
+                    {
+                        url = "https://" + XMPPServer.getInstance().getServerInfo().getHostname() + ":" + JiveGlobals.getProperty("httpbind.port.secure", "7443") + "/ofmeet/" + bookmark.getValue().split("@")[0];
+                        bookmark.setProperty("url", url);
+                    }  
+                    
+                    String quartz = bookmark.getProperty("quartz");   
+                    
+                    if (quartz == null)
+                    {
+                        quartz = "";
+                    }
+
+                    String urlHtml = "<a target='_blank' href='" + url + "'>" + url + "</a>";           
+            
+                    if (!"All".equals(users))
+                    {
+                        %>
+                        <tr style="border-left: none;">
+                        <td><%= roomHtml%></td>
+                        <td><%= urlHtml%></td>              
+                        <td><%= quartz%></td>
+                        <td><%= users%></td>
+                        <td><%= groups%></td>
+                        </tr>
+                        <%
+                    }               
+                } 
+
+                if (!hasBookmarks) 
+                {
+                    %>
+                    <tr>
+                        <td colspan="4" align="center"><fmt:message key="ofmeet.planner.none" /></td>
+                    </tr>
+                    <%
+                }
+        %>
         </table>
     </div>
-
 </body>
 </html>
