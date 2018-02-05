@@ -51,7 +51,7 @@
 
     final OfMeetPlugin container = (OfMeetPlugin) XMPPServer.getInstance().getPluginManager().getPlugin("ofmeet");
     final Videobridge videobridge = container.getVideobridge();
-    final Conference conference = videobridge.getConference( confid, JidCreate.bareFrom( focus ) );
+    final Conference conference = videobridge.getConference( confid, JidCreate.entityFullFrom( focus ) );
 
     if (conference == null) {
         response.sendRedirect("ofmeet-summary.jsp");
