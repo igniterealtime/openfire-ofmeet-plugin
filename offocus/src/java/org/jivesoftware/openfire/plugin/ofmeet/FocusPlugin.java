@@ -26,11 +26,13 @@ import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.util.StringUtils;
+import org.jivesoftware.util.TaskEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 
 import java.io.File;
+import java.util.TimerTask;
 
 /**
  * An Openfire plugin that provides 'focus' functionality to Openfire.
@@ -49,14 +51,28 @@ public class FocusPlugin implements Plugin
     public void initializePlugin( PluginManager pluginManager, File file )
     {
         ensureFocusUser();
-        try
+
+        // OFMeet must be fully loaded before focus starts to do service discovery.
+        TaskEngine.getInstance().schedule( new TimerTask()
         {
-            jitsiJicofoWrapper.initialize();
-        }
-        catch ( Exception e )
-        {
-            Log.error( "An exception occurred while initializing the Jitsi Jicofo wrapper.", e );
-        }
+            @Override
+            public void run()
+            {
+                if ( pluginManager.getPlugin( "ofmeet" ) != null )
+                {
+                    try
+                    {
+                        jitsiJicofoWrapper.initialize();
+                    }
+                    catch ( Exception e )
+                    {
+                        Log.error( "An exception occurred while initializing the Jitsi Jicofo wrapper.", e );
+                    }
+                    TaskEngine.getInstance().cancelScheduledTask( this );
+                }
+                Log.trace( "Waiting for ofmeet plugin to become available..." );
+            }
+        }, 0, 500 );
     }
 
     private void ensureFocusUser()
@@ -112,7 +128,7 @@ public class FocusPlugin implements Plugin
         }
         catch ( Exception ex )
         {
-            Log.error( "An exception occurred while trying to destroy the Jitsi Jicofo wrapper." );
+            Log.error( "An exception occurred while trying to destroy the Jitsi Jicofo wrapper.", ex );
         }
     }
 
