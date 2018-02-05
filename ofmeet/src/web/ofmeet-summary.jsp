@@ -87,13 +87,13 @@
                     ${status.count}
                 </td>
                 <td width="10%">
-                    <a href="ofmeet-conference.jsp?confid=${conference.ID}&focus=${conference.focus}">
+                    <a href="ofmeet-conference.jsp?confid=${admin:urlEncode(conference.ID)}&focus=${admin:urlEncode(conference.focus)}">
                         <c:out value="${conference.ID}"/>
                     </a>
                 </td>
                 <td width="25%">
                     <%
-                    %><a href="/muc-room-occupants.jsp?roomJID=${conference.name}%40${mucDomain}"><c:out value="${conference.name}"/></a>
+                    %><a href="/muc-room-occupants.jsp?roomJID=${admin:urlEncode(conference.name)}%40${admin:urlEncode(mucDomain)}"><c:out value="${conference.name}"/></a>
                 </td>
                 <td width="15%">
                     <c:if test="${not empty conference.lastKnowFocus}">
@@ -122,7 +122,7 @@
                     </c:if>
                 </td>
                 <td align="center" style="border-right:1px #ccc solid;">
-                    <a href="ofmeet-expire.jsp?confid=${conference.ID}&focus=${conference.focus}" title="<fmt:message key="ofmeet.summary.expire" />">
+                    <a href="ofmeet-expire.jsp?confid=${admin:urlEncode(conference.ID)}&focus=${admin:urlEncode(conference.focus)}" title="<fmt:message key="ofmeet.summary.expire" />">
                         <img src="images/delete-16x16.gif" width="16" height="16" border="0" alt="">
                     </a>
                 </td>
