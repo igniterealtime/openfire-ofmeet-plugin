@@ -29,7 +29,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- {openfire.version} used by managed dependencies, but also in the pom files of various modules. -->
-        <openfire.version>4.2.0-SNAPSHOT</openfire.version>
+        <openfire.version>4.2.0</openfire.version>
     </properties>
 
     <modules>
