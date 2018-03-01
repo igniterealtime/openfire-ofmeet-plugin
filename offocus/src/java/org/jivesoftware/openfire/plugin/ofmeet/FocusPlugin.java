@@ -20,19 +20,21 @@ import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jitsi.jicofo.FocusManager;
 import org.jitsi.jicofo.auth.AuthenticationAuthority;
 import org.jitsi.jicofo.reservation.ReservationSystem;
+import org.jivesoftware.openfire.ConnectionManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
+import org.jivesoftware.openfire.spi.ConnectionListener;
+import org.jivesoftware.openfire.spi.ConnectionManagerImpl;
+import org.jivesoftware.openfire.spi.ConnectionType;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.util.StringUtils;
-import org.jivesoftware.util.TaskEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 
 import java.io.File;
-import java.util.TimerTask;
 
 /**
  * An Openfire plugin that provides 'focus' functionality to Openfire.
@@ -47,32 +49,65 @@ public class FocusPlugin implements Plugin
 
     private final JitsiJicofoWrapper jitsiJicofoWrapper = new JitsiJicofoWrapper();
 
+    private Thread initThread = null;
+
     @Override
     public void initializePlugin( PluginManager pluginManager, File file )
     {
         ensureFocusUser();
 
         // OFMeet must be fully loaded before focus starts to do service discovery.
-        TaskEngine.getInstance().schedule( new TimerTask()
-        {
+        initThread = new Thread() {
             @Override
             public void run()
             {
-                if ( pluginManager.getPlugin( "ofmeet" ) != null )
+                boolean running = true;
+                while ( running )
                 {
+                    if ( pluginManager.getPlugin( "ofmeet" ) != null && isAcceptingClientConnections() )
+                    {
+                        try
+                        {
+                            jitsiJicofoWrapper.initialize();
+                            return;
+                        }
+                        catch ( Exception e )
+                        {
+                            Log.error( "An exception occurred while initializing the Jitsi Jicofo wrapper.", e );
+                        }
+                    }
+
+                    Log.trace( "Waiting for ofmeet plugin to become available and the server to accept client connections..." );
                     try
                     {
-                        jitsiJicofoWrapper.initialize();
+                        Thread.sleep( 500 );
                     }
-                    catch ( Exception e )
+                    catch ( InterruptedException e )
                     {
-                        Log.error( "An exception occurred while initializing the Jitsi Jicofo wrapper.", e );
+                        Log.debug( "Interrupted wait for ofmeet plugin to become available.", e );
+                        running = false;
                     }
-                    TaskEngine.getInstance().cancelScheduledTask( this );
                 }
-                Log.trace( "Waiting for ofmeet plugin to become available..." );
             }
-        }, 0, 500 );
+        };
+        initThread.start();
+    }
+
+    /**
+     * Checks if the server is accepting client connections on the default c2s port.
+     *
+     * @return true if the server is accepting connections, otherwise false.
+     */
+    private static boolean isAcceptingClientConnections()
+    {
+        final ConnectionManager cm = XMPPServer.getInstance().getConnectionManager();
+        if ( cm != null )
+        {
+            final ConnectionManagerImpl cmi = (( ConnectionManagerImpl) cm );
+            final ConnectionListener cl = cmi.getListener( ConnectionType.SOCKET_C2S, false );
+            return cl != null && cl.getSocketAcceptor() != null;
+        }
+        return false;
     }
 
     private void ensureFocusUser()
@@ -122,6 +157,12 @@ public class FocusPlugin implements Plugin
     @Override
     public void destroyPlugin()
     {
+        if ( initThread != null && initThread.isAlive() )
+        {
+            initThread.interrupt();
+            initThread = null;
+        }
+
         try
         {
             jitsiJicofoWrapper.destroy();
