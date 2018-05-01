@@ -58,13 +58,13 @@
         return;
     }
 
-    final Endpoint endpoint = conference.getEndpoint( endpointId );
+    final AbstractEndpoint endpoint = conference.getEndpoint( endpointId );
     if (endpoint == null) {
         response.sendRedirect("ofmeet-conference.jsp?confid=" + URLEncoder.encode( confid, "UTF-8") + "&focus=" + URLEncoder.encode( focus != null ? focus : "", "UTF-8" ) );
         return;
     }
 
-    final SctpConnection sctpConnection = endpoint.getSctpConnection();
+    final SctpConnection sctpConnection = ((Endpoint) endpoint).getSctpConnection();
     String lastActivity = null;
     String lastPayloadActivity = null;
     String lastTransportActivity = null;

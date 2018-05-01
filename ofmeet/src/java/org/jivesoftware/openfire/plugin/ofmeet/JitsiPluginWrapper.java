@@ -1,5 +1,7 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
+import org.jitsi.meet.OSGi;
+import org.jivesoftware.openfire.container.PluginClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jitsi.videobridge.Conference;
@@ -11,6 +13,8 @@ import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * A wrapper object for the Jitsi Videobridge Openfire plugin.
@@ -44,7 +48,27 @@ public class JitsiPluginWrapper
         System.setProperty( "org.jitsi.videobridge.PING_INTERVAL", "-1" );
 
         jitsiPlugin = new PluginImpl();
-        jitsiPlugin.initializePlugin( manager, pluginDirectory );
+
+        // Override the classloader used by the wrapped plugin with the classloader of ofmeet plugin.
+        // TODO Find a way that does not depend on reflection.
+        final Field field = manager.getClass().getDeclaredField( "classloaders" );
+        final boolean wasAccessible = field.isAccessible();
+        field.setAccessible( true );
+        try
+        {
+            final Map<Plugin, PluginClassLoader> classloaders = (Map<Plugin, PluginClassLoader>) field.get( manager );
+            classloaders.put( jitsiPlugin, manager.getPluginClassloader( manager.getPlugin( "ofmeet" ) ) );
+
+            jitsiPlugin.initializePlugin( manager, pluginDirectory );
+
+            // The reference to the classloader is no longer needed in the plugin manager. Better clean up immediately.
+            // (ordinary, we'd do this in the 'destroy' method of this class, but there doesn't seem a need to wait).
+            classloaders.remove( jitsiPlugin );
+        }
+        finally
+        {
+            field.setAccessible( wasAccessible );
+        }
         Log.trace( "Successfully initialized Jitsi Videobridge." );
     }
 

@@ -28,6 +28,7 @@ import org.jitsi.jicofo.xmpp.FocusComponent;
 import org.jitsi.meet.OSGi;
 import org.jitsi.meet.OSGiBundleConfig;
 import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.container.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.component.ComponentManagerFactory;
@@ -94,6 +95,7 @@ public class JitsiJicofoWrapper
         // Start the OSGi bundle for Jicofo.
         final OSGiBundleConfig jicofoConfig = new JicofoBundleConfig();
         OSGi.setBundleConfig(jicofoConfig);
+        OSGi.setClassLoader( XMPPServer.getInstance().getPluginManager().getPluginClassloader( XMPPServer.getInstance().getPluginManager().getPlugin( "offocus" ) ) );
 
         jicofoComponent = new FocusComponent( XMPPServer.getInstance().getServerInfo().getHostname(), 0, XMPPServer.getInstance().getServerInfo().getXMPPDomain(), jicofoSubdomain, null, focusAnonymous, XMPPServer.getInstance().createJID( "focus", null ).toBareJID() );
 

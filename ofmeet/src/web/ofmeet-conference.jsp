@@ -17,20 +17,17 @@
   - limitations under the License.
 --%>
 
-<%@ page import="org.jitsi.videobridge.Conference,
-                 org.jitsi.videobridge.Videobridge,
-                 org.jivesoftware.openfire.XMPPServer,
-                 org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin,
-                 org.jivesoftware.util.StringUtils"
+<%@ page import="org.jitsi.service.neomedia.MediaType,
+                 org.jitsi.videobridge.AbstractEndpoint,
+                 org.jitsi.videobridge.Conference"
     errorPage="error.jsp"
 %>
-<%@ page import="org.jivesoftware.util.ParamUtils" %>
-<%@ page import="org.jitsi.videobridge.Endpoint" %>
-<%@ page import="org.jitsi.service.neomedia.MediaType" %>
 <%@ page import="org.jitsi.videobridge.Content" %>
-<%@ page import="java.net.URLEncoder" %>
-<%@ page import="org.jxmpp.jid.Jid" %>
-<%@ page import="org.jxmpp.jid.impl.JidCreate" %>
+<%@ page import="org.jitsi.videobridge.Videobridge" %>
+<%@ page import="org.jivesoftware.openfire.XMPPServer" %>
+<%@ page import="org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin" %>
+<%@ page import="org.jivesoftware.util.ParamUtils" %>
+<%@ page import="org.jivesoftware.util.StringUtils" %><%@ page import="org.jxmpp.jid.impl.JidCreate"%><%@ page import="java.net.URLEncoder"%>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -128,7 +125,7 @@
         <%
             } else {
                 int i = 0;
-                for ( final Endpoint endpoint : conference.getEndpoints() )
+                for ( final AbstractEndpoint endpoint : conference.getEndpoints() )
                 {
                     i++;
         %>
@@ -145,13 +142,13 @@
                     <%= endpoint.getDisplayName() == null ? "<i>None</i>" : endpoint.getDisplayName() %>
                 </td>
                 <td align="center">
-                    <%= endpoint.getChannelCount( MediaType.AUDIO )%>
+                    <%= endpoint.getChannels( MediaType.AUDIO ).size() %>
                 </td>
                 <td align="center">
-                    <%= endpoint.getChannelCount( MediaType.DATA )%>
+                    <%= endpoint.getChannels( MediaType.DATA ).size() %>
                 </td>
                 <td align="center">
-                    <%= endpoint.getChannelCount( MediaType.VIDEO )%>
+                    <%= endpoint.getChannels( MediaType.VIDEO ).size() %>
                 </td>
             </tr>
         <%
