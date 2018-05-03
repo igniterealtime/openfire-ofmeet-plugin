@@ -49,7 +49,6 @@ public class InterfaceConfigServlet extends HttpServlet
             final JSONObject config = new JSONObject();
 
             config.put( "TOOLBAR_BUTTONS",                       new JSONArray( ofMeetConfig.getButtonsEnabled() ) );
-            config.put( "MAIN_TOOLBAR_BUTTONS",                  new JSONArray( ofMeetConfig.getButtonsOnTop()   ) );
             config.put( "INITIAL_TOOLBAR_TIMEOUT",               JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.initial.toolbar.timeout",       20000               ) );
             config.put( "TOOLBAR_TIMEOUT",                       JiveGlobals.getIntProperty(     "org.jitsi.videobridge.ofmeet.toolbar.timeout",               4000                ) );
 

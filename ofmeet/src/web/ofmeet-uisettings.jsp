@@ -128,27 +128,13 @@
         final String brandWatermarkLink = request.getParameter( "brandWatermarkLink" );
 
         // Buttons
-        final String[] buttonsEnabled = new String[99];
-        final String[] buttonsOnTop = new String[99];
+        final List<String> buttonsEnabled = new ArrayList<>();
         for ( final String buttonName : ofmeetConfig.getButtonsImplemented() )
         {
             final boolean buttonEnabled = ParamUtils.getBooleanParameter( request, "button-enabled-" + buttonName );
             if ( buttonEnabled )
             {
-                final int position = ParamUtils.getIntParameter( request, "button-order-" + buttonName, -1 );
-                if ( position < 0 )
-                {
-                    errors.put( "buttons", "Missing position for button: " + buttonName );
-                }
-                else
-                {
-                    final boolean onTop = "top".equals( ParamUtils.getParameter( request, "button-position-" + buttonName ) );
-                    buttonsEnabled[ position ] = buttonName;
-                    if ( onTop )
-                    {
-                        buttonsOnTop[ position ] = buttonName;
-                    }
-                }
+                buttonsEnabled.add( buttonName );
             }
         }
 
@@ -180,8 +166,7 @@
             ofmeetConfig.setWatermarkLogoUrl( watermarkLogoUrl );
             ofmeetConfig.setBrandWatermarkLogoUrl( brandWatermarkLogoUrl );
 
-            ofmeetConfig.setButtonsEnabled( Arrays.asList( buttonsEnabled ) );
-            ofmeetConfig.setButtonsOnTop( Arrays.asList( buttonsOnTop ) );
+            ofmeetConfig.setButtonsEnabled( buttonsEnabled );
 
 			container.populateJitsiSystemPropertiesWithJivePropertyValues();
 
@@ -338,31 +323,17 @@
         </table>
         <br/>
         <p><fmt:message key="ofmeet.toolbar.buttons.description"/></p>
-        <div class="jive-table">
-            <table cellpadding="3" cellspacing="0" border="0" width="100%">
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <c:forEach items="${ofmeetConfig.buttonsImplemented}" var="buttonName">
                 <tr>
-                    <th>&nbsp;</th>
-                    <th><fmt:message key="ofmeet.toolbar.button_name"/></th>
-                    <th><fmt:message key="ofmeet.toolbar.button_description"/></th>
-                    <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.enabled"/></th>
-                    <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.left_toolbar"/></th>
-                    <th style="text-align: center" width="80"><fmt:message key="ofmeet.toolbar.top_toolbar"/></th>
+                    <td>
+                        <input type="checkbox" name="button-enabled-${buttonName}" ${ofmeetConfig.buttonsEnabled.contains( buttonName ) ? 'checked': ''}>
+                        <fmt:message key="ofmeet.toolbar.button.${buttonName}.description"/>
+                    </td>
                 </tr>
-                <c:forEach items="${ofmeetConfig.buttonsImplemented}" var="buttonName" varStatus="status">
-                    <tr class="${ ( (status.index + 1) % 2 ) eq 0 ? 'jive-even' : 'jive-odd'}">
-                        <td width="1%">${status.count}</td>
-                        <td><c:out value="${buttonName}"/></td>
-                        <td><fmt:message key="ofmeet.toolbar.button.${buttonName}.description"/></td>
-                        <td align="center"><input type="checkbox" name="button-enabled-${buttonName}" ${ofmeetConfig.buttonsEnabled.contains( buttonName ) ? 'checked': ''}></td>
-                        <td align="center"><input type="radio" name="button-position-${buttonName}" value="left"${ofmeetConfig.buttonsOnTop.contains( buttonName ) ? '': 'checked'}/></td>
-                        <td align="center"><input type="radio" name="button-position-${buttonName}" value="top" ${ofmeetConfig.buttonsOnTop.contains( buttonName ) ? 'checked': ''}/>
-                                           <input type="hidden" name="button-order-${buttonName}" value="${status.count}"/>
-                        </td>
-                    </tr>
-                </c:forEach>
-            </table>
-        </div>
-    </admin:contentBox>
+            </c:forEach>
+        </table>
+</admin:contentBox>
 
     <fmt:message key="ofmeet.watermark.title" var="boxtitleWatermarks"/>
     <admin:contentBox title="${boxtitleWatermarks}">

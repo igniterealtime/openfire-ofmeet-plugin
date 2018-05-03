@@ -188,9 +188,8 @@ public class OFMeetConfig
 
     public List<String> getButtonsImplemented()
     {
-        // These should match the implementations that are provided in the defaultToolbarButtons.js file in jitsi-meet.
-        // The order of this list is used as the default ordering of the buttons.
-        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "fodeviceselection", "hangup", "profile", "contacts", "info", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "videoquality", "filmstrip" ) );
+        // These should match the implementations that are provided in the Toolbox.web.js file in jitsi-meet.
+        return JiveGlobals.getListProperty( "ofmeet.buttons.implemented", Arrays.asList( "camera", "chat", "desktop", "etherpad", "feedback", "fodeviceselection", "fullscreen", "hangup", "info", "invite", "microphone", "profile", "raisehand", "settings", "sharedvideo", "shortcuts", "stats", "videoquality" ) );
     }
 
     public void resetButtonsImplemented()
@@ -205,27 +204,12 @@ public class OFMeetConfig
 
     public List<String> getButtonsEnabled()
     {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "fodeviceselection", "hangup", "profile", "contacts", "info", "chat", "recording", "etherpad", "sharedvideo", "sip", "dialpad", "settings", "raisehand", "videoquality", "filmstrip" ) );
+        return JiveGlobals.getListProperty( "ofmeet.buttons.enabled", Arrays.asList( "camera", "chat", "desktop", "etherpad", "feedback", "fodeviceselection", "fullscreen", "hangup", "info", "invite", "microphone", "profile", "raisehand", "settings", "sharedvideo", "shortcuts", "stats", "videoquality" ) );
     }
 
     public void resetButtonsEnabled()
     {
         JiveGlobals.deleteProperty( "ofmeet.buttons.enabled" );
-    }
-
-    public void setButtonsOnTop( List<String> buttons )
-    {
-        JiveGlobals.setProperty( "ofmeet.buttons.onTop", buttons );
-    }
-
-    public List<String> getButtonsOnTop()
-    {
-        return JiveGlobals.getListProperty( "ofmeet.buttons.onTop", Arrays.asList( "microphone", "camera", "desktop", "invite", "fullscreen", "fodeviceselection", "hangup" ) );
-    }
-
-    public void resetButtonsOnTop()
-    {
-        JiveGlobals.deleteProperty( "ofmeet.buttons.onTop" );
     }
 
     public void setPublicNATAddress( InetAddress address )
