@@ -320,10 +320,6 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
      */
     public void populateJitsiSystemPropertiesWithJivePropertyValues()
     {
-        // MAX/MIN_PORT_DEFAULT_VALUE: Instead of 5000-6000 (jitsi's default) use something that does not clash with default XMPP port numbers.
-        System.setProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, JiveGlobals.getProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, "50000" ) );
-        System.setProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, JiveGlobals.getProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, "60000" ) );
-
         System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_LOCATION",  pluginDirectory.getAbsolutePath() );
         System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "." );
         System.setProperty( "net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath() );

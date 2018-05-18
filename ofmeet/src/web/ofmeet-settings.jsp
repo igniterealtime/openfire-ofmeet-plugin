@@ -13,16 +13,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   --%>
-<%@ page import="org.ice4j.ice.harvest.MappingCandidateHarvesters" %>
 <%@ page import="org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext" %>
-<%@ page import="org.jitsi.videobridge.openfire.PluginImpl" %>
 <%@ page import="org.jivesoftware.openfire.XMPPServer" %>
 <%@ page import="org.jivesoftware.openfire.plugin.ofmeet.OfMeetPlugin" %>
-<%@ page import="java.net.InetAddress" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="org.jivesoftware.util.*" %>
-<%@ page import="java.net.UnknownHostException" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -46,65 +42,6 @@
         {
             errors.put( "csrf", "CSRF Failure!" );
         }
-
-        final String minPort = request.getParameter( "minport" );
-        try {
-            final int port = Integer.parseInt( minPort );
-            if ( port < 1 && port > 65535 ) {
-                errors.put( "minPort", "Port number is out of the valid range (1 >= port => 65535)." );
-            }
-        } catch (NumberFormatException ex ) {
-            errors.put( "minPort", "Cannot parse value as integer value." );
-        }
-
-        final String maxPort = request.getParameter( "maxport" );
-        try {
-            final int port = Integer.parseInt( maxPort );
-            if ( port < 1 && port > 65535 ) {
-                errors.put( "maxport", "Port number is out of the valid range (1 >= port => 65535)." );
-            }
-        } catch (NumberFormatException ex ) {
-            errors.put( "maxport", "Cannot parse value as integer value." );
-        }
-
-        InetAddress localAddress;
-        final String localAddressVal = request.getParameter( "localaddress" );
-        if ( localAddressVal == null || localAddressVal.isEmpty() )
-        {
-            localAddress = null;
-        }
-        else
-        {
-            try
-            {
-                localAddress = InetAddress.getByName( localAddressVal );
-            }
-            catch ( UnknownHostException e )
-            {
-                errors.put( "localAddress", "Value is not an IP address." );
-                localAddress = null;
-            }
-        }
-
-        InetAddress publicAddress;
-        final String publicAddressVal = request.getParameter( "publicaddress" );
-        if ( publicAddressVal == null || publicAddressVal.isEmpty() )
-        {
-            publicAddress = null;
-        }
-        else
-        {
-            try
-            {
-                publicAddress = InetAddress.getByName( publicAddressVal );
-            }
-            catch ( UnknownHostException e )
-            {
-                errors.put( "publicAddress", "Value is not an IP address." );
-                publicAddress = null;
-            }
-        }
-
 
         final boolean checkreplay = ParamUtils.getBooleanParameter( request, "checkreplay" );
         final boolean securityenabled = ParamUtils.getBooleanParameter( request, "securityenabled" );
@@ -178,8 +115,6 @@
 
         if ( errors.isEmpty() )
         {
-            JiveGlobals.setProperty( PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME, minPort );
-            JiveGlobals.setProperty( PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME, maxPort );
             JiveGlobals.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME, Boolean.toString( checkreplay ) );
             JiveGlobals.setProperty( "ofmeet.security.enabled", Boolean.toString( securityenabled ) );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
@@ -202,8 +137,6 @@
             ofmeetConfig.setStartAudioMuted( startaudiomuted == null || startaudiomuted.isEmpty() ? null : Integer.parseInt( startaudiomuted ));
             ofmeetConfig.setStartVideoMuted( startvideomuted == null || startvideomuted.isEmpty() ? null : Integer.parseInt( startvideomuted ));
             ofmeetConfig.setResolution( Integer.parseInt( resolution ) );
-            ofmeetConfig.setLocalNATAddress( localAddress );
-            ofmeetConfig.setPublicNATAddress( publicAddress );
             ofmeetConfig.setChannelLastN( channelLastN );
             ofmeetConfig.setAdaptiveLastN( adaptivelastn );
             ofmeetConfig.setSimulcast( simulcast );
@@ -226,10 +159,6 @@
     pageContext.setAttribute( "errors", errors );
     pageContext.setAttribute( "restartNeeded", container.restartNeeded );
     pageContext.setAttribute( "serverInfo", XMPPServer.getInstance().getServerInfo() );
-    pageContext.setAttribute( "MIN_PORT_NUMBER_PROPERTY_NAME", PluginImpl.MIN_PORT_NUMBER_PROPERTY_NAME );
-    pageContext.setAttribute( "MAX_PORT_NUMBER_PROPERTY_NAME", PluginImpl.MAX_PORT_NUMBER_PROPERTY_NAME );
-    pageContext.setAttribute( "NAT_HARVESTER_LOCAL_ADDRESS_PNAME", MappingCandidateHarvesters.NAT_HARVESTER_LOCAL_ADDRESS_PNAME );
-    pageContext.setAttribute( "NAT_HARVESTER_PUBLIC_ADDRESS_PNAME", MappingCandidateHarvesters.NAT_HARVESTER_PUBLIC_ADDRESS_PNAME );
     pageContext.setAttribute( "CHECK_REPLAY_PNAME", SRTPCryptoContext.CHECK_REPLAY_PNAME );
 %>
 <html>
@@ -342,22 +271,6 @@
     <admin:contentBox title="${boxtitlemedia}">
 
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.min.port"/>:</td>
-                <td><input name="minport" type="text" maxlength="5" size="5" value="${admin:getIntProperty( MIN_PORT_NUMBER_PROPERTY_NAME, 5000)}"/></td>
-            </tr>
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.max.port"/>:</td>
-                <td><input name="maxport" type="text" maxlength="5" size="5" value="${admin:getIntProperty( MAX_PORT_NUMBER_PROPERTY_NAME, 6000)}"/></td>
-            </tr>
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.local.ip.address"/>:</td>
-                <td><input name="localaddress" type="text" maxlength="20" size="15" value="${ofmeetConfig.localNATAddress.hostAddress}"/></td>
-            </tr>
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.public.ip.address"/>:</td>
-                <td><input name="publicaddress" type="text" maxlength="20" size="15" value="${ofmeetConfig.publicNATAddress.hostAddress}"/></td>
-            </tr>
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="checkreplay" ${admin:getBooleanProperty( CHECK_REPLAY_PNAME, false) ? "checked" : ""}>
