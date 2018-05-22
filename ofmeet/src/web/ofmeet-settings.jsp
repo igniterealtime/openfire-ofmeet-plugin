@@ -43,7 +43,6 @@
             errors.put( "csrf", "CSRF Failure!" );
         }
 
-        final boolean checkreplay = ParamUtils.getBooleanParameter( request, "checkreplay" );
         final boolean securityenabled = ParamUtils.getBooleanParameter( request, "securityenabled" );
         final String authusername = request.getParameter( "authusername" );
         final String sippassword = request.getParameter( "sippassword" );
@@ -99,19 +98,6 @@
             errors.put( "videoConstraintsMaxHeight", "Cannot parse value as integer value." );
         }
 
-        final String audiobandwidth = request.getParameter( "audiobandwidth" );
-        try {
-            Integer.parseInt( audiobandwidth );
-        } catch (NumberFormatException ex ) {
-            errors.put( "audiobandwidth", "Cannot parse value as integer value." );
-        }
-        final String videobandwidth = request.getParameter( "videobandwidth" );
-        try {
-            Integer.parseInt( videobandwidth );
-        } catch (NumberFormatException ex ) {
-            errors.put( "videobandwidth", "Cannot parse value as integer value." );
-        }
-        final boolean audiomixer = ParamUtils.getBooleanParameter( request, "audiomixer" );
         final String clientusername = request.getParameter( "clientusername" );
         final String clientpassword = request.getParameter( "clientpassword" );
         final String enableSip = request.getParameter( "enableSip" );
@@ -133,7 +119,6 @@
 
         if ( errors.isEmpty() )
         {
-            JiveGlobals.setProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME, Boolean.toString( checkreplay ) );
             JiveGlobals.setProperty( "ofmeet.security.enabled", Boolean.toString( securityenabled ) );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sipauthuser", authusername );
             JiveGlobals.setProperty( "voicebridge.default.proxy.sippassword", sippassword );
@@ -142,9 +127,6 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.iceservers", iceServers );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.useipv6", Boolean.toString( useIPv6 ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.usenicks", Boolean.toString( useNicks ) );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.audio.bandwidth", audiobandwidth );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.video.bandwidth", videobandwidth );
-            JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", Boolean.toString( audiomixer ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.username", clientusername );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.password", clientpassword );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.enabled", enableSip );
@@ -180,7 +162,6 @@
     pageContext.setAttribute( "errors", errors );
     pageContext.setAttribute( "restartNeeded", container.restartNeeded );
     pageContext.setAttribute( "serverInfo", XMPPServer.getInstance().getServerInfo() );
-    pageContext.setAttribute( "CHECK_REPLAY_PNAME", SRTPCryptoContext.CHECK_REPLAY_PNAME );
 %>
 <html>
 <head>
@@ -242,32 +223,6 @@
                     <input type="text" size="100" maxlength="256" name="iceservers"
                            value="${admin:getProperty("org.jitsi.videobridge.ofmeet.iceservers", "")}"
                            placeholder="{ 'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }] }">
-                </td>
-            </tr>
-        </table>
-
-        <table>
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.audio.bandwidth"/>:</td>
-                <td><input type="text" size="10" maxlength="100" name="audiobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", 64)}"></td>
-            </tr>
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.video.bandwidth"/>:</td>
-                <td><input type="text" size="10" maxlength="100" name="videobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", 512)}"></td>
-            </tr>
-        </table>
-
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="checkreplay" ${admin:getBooleanProperty( CHECK_REPLAY_PNAME, false) ? "checked" : ""}>
-                    <fmt:message key="config.page.configuration.checkreplay.enabled_description" />
-                </td>
-            </tr>
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="audiomixer" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", false) ? "checked" : ""}>
-                    <fmt:message key="config.page.configuration.audiomixer.enabled_description" />
                 </td>
             </tr>
         </table>

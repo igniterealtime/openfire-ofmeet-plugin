@@ -84,9 +84,6 @@ public class ConfigServlet extends HttpServlet
 
 
             int minHDHeight = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.min.hdheight", 540 );
-            boolean audioMixer = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", false );
-            int audioBandwidth = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.audio.bandwidth", 128 );
-            int videoBandwidth = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.video.bandwidth", 4096 );
             boolean useNicks = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.usenicks", false );
             boolean useIPv6 = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.useipv6", false );
             boolean useStunTurn = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.use.stunturn", false );
@@ -203,10 +200,6 @@ public class ConfigServlet extends HttpServlet
             videoConstraints.put( "height", height );
             constraints.put( "video", videoConstraints );
             config.put( "constraints", constraints );
-
-            config.put( "audioMixer", audioMixer );
-            config.put( "audioBandwidth", audioBandwidth );
-            config.put( "videoBandwidth", videoBandwidth );
 
             config.put( "useRoomAsSharedDocumentName", false );
             config.put( "logStats", logStats );
