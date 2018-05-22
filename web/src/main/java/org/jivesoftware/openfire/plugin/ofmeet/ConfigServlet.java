@@ -29,6 +29,7 @@ import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.Version;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,7 +189,21 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "startVideoMuted", ofMeetConfig.getStartVideoMuted() );
             }
+
+            // 'resolution' is used in some cases (chrome <61), newer versions use 'constraints'.
             config.put( "resolution", ofMeetConfig.getResolution() );
+            final JSONObject constraints = new JSONObject();
+            final JSONObject videoConstraints = new JSONObject();
+
+            videoConstraints.put( "aspectRatio", (JSONString) ofMeetConfig::getVideoConstraintsIdealAspectRatio ); // This cast causes the JSON-quoting of strings to be skipped (the ratio here is a simple function, not text)
+            final Map<String, Object> height = new HashMap<>();
+            height.put( "ideal", ofMeetConfig.getVideoConstraintsIdealHeight() );
+            height.put( "max", ofMeetConfig.getVideoConstraintsMaxHeight() );
+            height.put( "min", ofMeetConfig.getVideoConstraintsMinHeight() );
+            videoConstraints.put( "height", height );
+            constraints.put( "video", videoConstraints );
+            config.put( "constraints", constraints );
+
             config.put( "audioMixer", audioMixer );
             config.put( "audioBandwidth", audioBandwidth );
             config.put( "videoBandwidth", videoBandwidth );

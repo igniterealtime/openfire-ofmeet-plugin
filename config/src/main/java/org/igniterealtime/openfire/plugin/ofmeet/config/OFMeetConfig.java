@@ -295,6 +295,7 @@ public class OFMeetConfig
         JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.resolution", Integer.toString( resolution ) );
     }
 
+    // Resolution is used in older clients (chrome < 61) while 'constraints' are used in newer clients.
     public int getResolution()
     {
         return JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.resolution", 720 );
@@ -303,6 +304,72 @@ public class OFMeetConfig
     public void resetResolution()
     {
         JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.resolution" );
+    }
+
+    public void setVideoConstraintsIdealAspectRatio( String ratio )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.constraints.video.aspectratio.ideal", ratio );
+    }
+
+    // Resolution is used in older clients (chrome < 61) while 'constraints' are used in newer clients.
+    public String getVideoConstraintsIdealAspectRatio()
+    {
+        return JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.constraints.video.aspectratio.ideal", "16 / 9" );
+    }
+
+    public void resetVideoConstraintsIdealAspectRatio()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.constraints.video.aspectratio.ideal" );
+    }
+
+    public void setVideoConstraintsIdealHeight( int idealHeight )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.ideal", Integer.toString( idealHeight ) );
+    }
+
+    // Resolution is used in older clients (chrome < 61) while 'constraints' are used in newer clients.
+    public int getVideoConstraintsIdealHeight()
+    {
+        return JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.ideal", getResolution() );
+    }
+
+    public void resetVideoConstraintsIdealHeight()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.ideal" );
+    }
+
+    public void setVideoConstraintsMaxHeight( int maxHeight )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.max", Integer.toString( maxHeight ) );
+    }
+
+    // Resolution is used in older clients (chrome < 61) while 'constraints' are used in newer clients.
+    public int getVideoConstraintsMaxHeight()
+    {
+        final int value = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.max", getVideoConstraintsIdealHeight() * 3 );
+        return Math.max( value, getVideoConstraintsIdealHeight() ); // don't have a 'max' that is lower than 'ideal'.
+    }
+
+    public void resetVideoConstraintsMaxHeight( int maxHeight )
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.max" );
+    }
+
+    public void setVideoConstraintsMinHeight( int minHeight )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.min", Integer.toString( minHeight ) );
+    }
+
+    // Resolution is used in older clients (chrome < 61) while 'constraints' are used in newer clients.
+    public int getVideoConstraintsMinHeight()
+    {
+        final int value = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.min", getVideoConstraintsIdealHeight() / 3 );
+        return Math.min( value, getVideoConstraintsIdealHeight() ); // don't have a 'min' that is lower than 'ideal'.
+    }
+
+    public void resetVideoConstraintsMinHeight()
+    {
+        JiveGlobals.deleteProperty( "org.jitsi.videobridge.ofmeet.constraints.video.height.min" );
     }
 
     public void setLipSync( boolean lipSync )

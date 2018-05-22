@@ -75,12 +75,30 @@
 
         final boolean useIPv6 = ParamUtils.getBooleanParameter( request, "useipv6" );
         final boolean useNicks = ParamUtils.getBooleanParameter( request, "usenicks" );
-        final String resolution = request.getParameter( "resolution" );
-        try {
-            Integer.parseInt( resolution );
-        } catch (NumberFormatException ex ) {
-            errors.put( "resolution", "Cannot parse value as integer value." );
+        final String videoConstraintsIdealAspectRatio = request.getParameter( "videoConstraintsIdealAspectRatio" );
+        if(!videoConstraintsIdealAspectRatio.matches("[0-9: .,/]+"))
+        {
+            errors.put( "videoConstraintsIdealAspectRatio", "Cannot parse value as aspect ratio value." );
         }
+        final String videoConstraintsMinHeight = request.getParameter( "videoConstraintsMinHeight" );
+        try {
+            Integer.parseInt( videoConstraintsMinHeight );
+        } catch (NumberFormatException ex ) {
+            errors.put( "videoConstraintsMinHeight", "Cannot parse value as integer value." );
+        }
+        final String videoConstraintsIdealHeight = request.getParameter( "videoConstraintsIdealHeight" );
+        try {
+            Integer.parseInt( videoConstraintsIdealHeight );
+        } catch (NumberFormatException ex ) {
+            errors.put( "videoConstraintsIdealHeight", "Cannot parse value as integer value." );
+        }
+        final String videoConstraintsMaxHeight = request.getParameter( "videoConstraintsMaxHeight" );
+        try {
+            Integer.parseInt( videoConstraintsMaxHeight );
+        } catch (NumberFormatException ex ) {
+            errors.put( "videoConstraintsMaxHeight", "Cannot parse value as integer value." );
+        }
+
         final String audiobandwidth = request.getParameter( "audiobandwidth" );
         try {
             Integer.parseInt( audiobandwidth );
@@ -136,7 +154,10 @@
             ofmeetConfig.setStartAudioOnly( startaudioonly );
             ofmeetConfig.setStartAudioMuted( startaudiomuted == null || startaudiomuted.isEmpty() ? null : Integer.parseInt( startaudiomuted ));
             ofmeetConfig.setStartVideoMuted( startvideomuted == null || startvideomuted.isEmpty() ? null : Integer.parseInt( startvideomuted ));
-            ofmeetConfig.setResolution( Integer.parseInt( resolution ) );
+            ofmeetConfig.setVideoConstraintsIdealAspectRatio( videoConstraintsIdealAspectRatio );
+            ofmeetConfig.setVideoConstraintsMinHeight( Integer.parseInt( videoConstraintsMinHeight ) );
+            ofmeetConfig.setVideoConstraintsIdealHeight( Integer.parseInt( videoConstraintsIdealHeight ) );
+            ofmeetConfig.setVideoConstraintsMaxHeight( Integer.parseInt( videoConstraintsMaxHeight ) );
             ofmeetConfig.setChannelLastN( channelLastN );
             ofmeetConfig.setAdaptiveLastN( adaptivelastn );
             ofmeetConfig.setSimulcast( simulcast );
@@ -225,6 +246,76 @@
             </tr>
         </table>
 
+        <table>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.audio.bandwidth"/>:</td>
+                <td><input type="text" size="10" maxlength="100" name="audiobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", 64)}"></td>
+            </tr>
+            <tr>
+                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.video.bandwidth"/>:</td>
+                <td><input type="text" size="10" maxlength="100" name="videobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", 512)}"></td>
+            </tr>
+        </table>
+
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="checkreplay" ${admin:getBooleanProperty( CHECK_REPLAY_PNAME, false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.checkreplay.enabled_description" />
+                </td>
+            </tr>
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="audiomixer" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", false) ? "checked" : ""}>
+                    <fmt:message key="config.page.configuration.audiomixer.enabled_description" />
+                </td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+    <fmt:message key="config.page.configuration.media.title" var="boxtitlemedia"/>
+    <admin:contentBox title="${boxtitlemedia}">
+        <p>
+            <fmt:message key="config.page.configuration.ofmeet.constraints.description"/>
+        </p>
+        <table>
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="videoConstraintsIdealAspectRatio"><fmt:message key="config.page.configuration.ofmeet.constraints.video.aspectratio.ideal"/></label>
+                </td>
+                <td>
+                    <input type="text" name="videoConstraintsIdealAspectRatio" id="videoConstraintsIdealAspectRatio" value="${ofmeetConfig.videoConstraintsIdealAspectRatio}">
+                </td>
+            </tr>
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="videoConstraintsMinHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.min"/></label>
+                </td>
+                <td>
+                    <input type="number" min="0" name="videoConstraintsMinHeight" id="videoConstraintsMinHeight" value="${ofmeetConfig.videoConstraintsMinHeight}">
+                    <label for="videoConstraintsMinHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.unit"/></label>
+                </td>
+            </tr>
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="videoConstraintsIdealHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.ideal"/></label>
+                </td>
+                <td>
+                    <input type="number" min="0" name="videoConstraintsIdealHeight" id="videoConstraintsIdealHeight" value="${ofmeetConfig.videoConstraintsIdealHeight}">
+                    <label for="videoConstraintsIdealHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.unit"/></label>
+                </td>
+            </tr>
+            <tr>
+                <td nowrap>
+                    <label class="jive-label" for="videoConstraintsMaxHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.max"/></label>
+                </td>
+                <td>
+                    <input type="number" min="0" name="videoConstraintsMaxHeight" id="videoConstraintsMaxHeight" value="${ofmeetConfig.videoConstraintsMaxHeight}">
+                    <label for="videoConstraintsMaxHeight"><fmt:message key="config.page.configuration.ofmeet.constraints.video.height.unit"/></label>
+                </td>
+            </tr>
+        </table>
+
         <p style="margin-top: 2em"><fmt:message key="config.page.configuration.ofmeet.audioonly.description"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
@@ -251,39 +342,6 @@
             </tr>
         </table>
 
-        <table>
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.resolution"/>:</td>
-                <td><input type="text" size="10" maxlength="100" name="resolution" value="${ofmeetConfig.resolution}"></td>
-            </tr>
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.audio.bandwidth"/>:</td>
-                <td><input type="text" size="10" maxlength="100" name="audiobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.audio.bandwidth", 64)}"></td>
-            </tr>
-            <tr>
-                <td align="left" width="200"><fmt:message key="config.page.configuration.ofmeet.video.bandwidth"/>:</td>
-                <td><input type="text" size="10" maxlength="100" name="videobandwidth" value="${admin:getIntProperty("org.jitsi.videobridge.ofmeet.video.bandwidth", 512)}"></td>
-            </tr>
-        </table>
-    </admin:contentBox>
-
-    <fmt:message key="config.page.configuration.media.title" var="boxtitlemedia"/>
-    <admin:contentBox title="${boxtitlemedia}">
-
-        <table cellpadding="3" cellspacing="0" border="0" width="100%">
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="checkreplay" ${admin:getBooleanProperty( CHECK_REPLAY_PNAME, false) ? "checked" : ""}>
-                    <fmt:message key="config.page.configuration.checkreplay.enabled_description" />
-                </td>
-            </tr>
-            <tr>
-                <td nowrap colspan="2">
-                    <input type="checkbox" name="audiomixer" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.audio.mixer", false) ? "checked" : ""}>
-                    <fmt:message key="config.page.configuration.audiomixer.enabled_description" />
-                </td>
-            </tr>
-        </table>
     </admin:contentBox>
 
     <fmt:message key="config.page.configuration.security.title" var="boxtitlesecurity"/>
