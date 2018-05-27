@@ -1,4 +1,4 @@
-/**
+/*
  * $Revision $
  * $Date $
  *
@@ -41,6 +41,7 @@ import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.event.SessionEventDispatcher;
 import org.jivesoftware.openfire.event.SessionEventListener;
 import org.jivesoftware.openfire.http.HttpBindManager;
+import org.jivesoftware.openfire.interceptor.InterceptorManager;
 import org.jivesoftware.openfire.net.SASLAuthentication;
 import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetAzure;
 import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetLoginService;
@@ -89,6 +90,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private OfMeetIQHandler ofmeetIQHandler;
     private WebAppContext publicWebApp;
+    private BookmarkInterceptor bookmarkInterceptor;
 
     private final JitsiPluginWrapper jitsiPluginWrapper;
     private final MeetingPlanner meetingPlanner;
@@ -157,6 +159,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             ofmeetIQHandler = new OfMeetIQHandler( getVideobridge() );
             XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
 
+            if ( JiveGlobals.getBooleanProperty( "ofmeet.bookmarks.auto-enable", true ) )
+            {
+                bookmarkInterceptor = new BookmarkInterceptor( this );
+                InterceptorManager.getInstance().addInterceptor( bookmarkInterceptor );
+            }
+
             SessionEventDispatcher.addListener(this);
 
             PropertyEventDispatcher.addListener( this );
@@ -222,6 +230,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
 
         ClusterManager.removeListener(this);
+
+        if ( bookmarkInterceptor != null )
+        {
+            InterceptorManager.getInstance().removeInterceptor( bookmarkInterceptor );
+            bookmarkInterceptor = null;
+        }
     }
 
     protected void loadPublicWebApp() throws Exception
