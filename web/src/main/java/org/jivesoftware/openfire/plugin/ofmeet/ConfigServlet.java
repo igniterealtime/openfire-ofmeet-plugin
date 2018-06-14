@@ -94,10 +94,14 @@ public class ConfigServlet extends HttpServlet
             boolean enableWelcomePage = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.welcomePage", true );
             boolean enableRtpStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.rtp.stats", true );
             boolean openSctp = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.open.sctp", true );
-            String desktopSharing = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing", "ext" );
-            String chromeExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.chrome.extension.id", "fohfnhgabmicpkjcpjpjongpijcffaba" );
-            String desktopShareSrcs = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.sources", "[\"screen\", \"window\"]" );
-            String minChromeExtVer = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", "0.1" );
+            String desktopSharingChromeExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.chrome.extension.id", null );
+            String desktopSharingFirefoxExtensionId = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.firefox.extension.id", null );
+            boolean desktopSharingChromeEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.chrome.enabled", false );
+            boolean desktopSharingFirefoxEnabled = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.firefox.enabled", false );
+            String desktopSharingChromeSources = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.sources", "[\"screen\", \"window\", \"tab\"]" );
+            String desktopSharingChromeMinExtVersion = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.min.chrome.ext.ver", null );
+            String desktopSharingFirefoxMaxVersionExtRequired = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.firefox.max.ver.ext.required" );
+            String desktopSharingFirefoxExtensionURL = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.desktop.sharing.firefox.ext.url" );
             int startBitrate = JiveGlobals.getIntProperty( "org.jitsi.videobridge.ofmeet.start.bitrate", 800 );
             boolean logStats = JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.enable.stats.logging", false );
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
@@ -161,16 +165,30 @@ public class ConfigServlet extends HttpServlet
             config.put( "clientNode", "http://igniterealtime.org/ofmeet/jitsi-meet/" );
             config.put( "focusUserJid", XMPPServer.getInstance().createJID( "focus", null ).toBareJID() );
             config.put( "defaultSipNumber", defaultSipNumber );
-            config.put( "desktopSharingChromeMethod", desktopSharing );
-            config.put( "desktopSharingChromeExtId", chromeExtensionId );
-            config.put( "desktopSharingChromeSources", new JSONArray( desktopShareSrcs ) );
-            config.put( "desktopSharingChromeMinExtVersion", minChromeExtVer );
+
+            // Id of desktop streamer Chrome extension
+            config.put( "desktopSharingChromeExtId", desktopSharingChromeExtensionId );
+
+            // Whether desktop sharing should be disabled on Chrome.
+            config.put( "desktopSharingChromeDisabled", !desktopSharingChromeEnabled );
+
+            // The media sources to use when using screen sharing with the Chrome
+            // extension.
+            config.put( "desktopSharingChromeSources", new JSONArray( desktopSharingChromeSources ) );
+
+            // Required version of Chrome extension
+            config.put( "desktopSharingChromeMinExtVersion", desktopSharingChromeMinExtVersion );
+
+            // Whether desktop sharing should be disabled on Firefox.
+            config.put( "desktopSharingFirefoxExtId", desktopSharingFirefoxExtensionId );
+
+            // Whether desktop sharing should be disabled on Firefox.
+            config.put( "desktopSharingFirefoxDisabled", !desktopSharingFirefoxEnabled );
+
+            config.put( "desktopSharingFirefoxMaxVersionExtRequired", desktopSharingFirefoxMaxVersionExtRequired );
+            config.put( "desktopSharingFirefoxExtensionURL", desktopSharingFirefoxExtensionURL );
+
             config.put( "minHDHeight", minHDHeight );
-            config.put( "desktopSharingFirefoxExtId", "jidesha@meet.jit.si" );
-            config.put( "desktopSharingFirefoxDisabled", false );
-            config.put( "desktopSharingFirefoxMaxVersionExtRequired", 51 );
-            config.put( "desktopSharingFirefoxExtensionURL", request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/jidesha-0.1.1-fx.xpi");
-            config.put( "desktopSharingFirefoxExtId", "jidesha@meet.jit.si" );
             config.put( "hiddenDomain", "recorder." + xmppDomain );
             config.put( "startBitrate", startBitrate );
             config.put( "recordingType", "colibri" );
