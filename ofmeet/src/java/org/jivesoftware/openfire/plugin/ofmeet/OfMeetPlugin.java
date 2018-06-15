@@ -304,6 +304,18 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public URL getWebappURL()
     {
+        final String override = JiveGlobals.getProperty( "ofmeet.webapp.url.override" );
+        if ( override != null && !override.trim().isEmpty() )
+        {
+            try
+            {
+                return new URL( override );
+            }
+            catch ( MalformedURLException e )
+            {
+                Log.warn( "An override for the webapp address is defined in 'ofmeet.webapp.url.override', but its value is not a valid URL.", e );
+            }
+        }
         try
         {
             final String protocol = "https"; // No point in providing the non-SSL protocol, as webRTC won't work there.
