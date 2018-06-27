@@ -32,7 +32,6 @@ import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
 import org.jitsi.videobridge.Videobridge;
 import org.jitsi.videobridge.Conference;
 import org.jitsi.videobridge.Content;
-import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
@@ -92,12 +91,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private WebAppContext publicWebApp;
     private BookmarkInterceptor bookmarkInterceptor;
 
-    private final JitsiPluginWrapper jitsiPluginWrapper;
+    private final JvbPluginWrapper jvbPluginWrapper;
     private final MeetingPlanner meetingPlanner;
 
     public OfMeetPlugin()
     {
-        jitsiPluginWrapper = new JitsiPluginWrapper();
+        jvbPluginWrapper = new JvbPluginWrapper();
         meetingPlanner = new MeetingPlanner();
     }
 
@@ -120,7 +119,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         try
         {
             populateJitsiSystemPropertiesWithJivePropertyValues();
-            jitsiPluginWrapper.initialize( manager, pluginDirectory );
+            jvbPluginWrapper.initialize( manager, pluginDirectory );
         }
         catch ( Exception ex )
         {
@@ -222,7 +221,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
         try
         {
-            jitsiPluginWrapper.destroy();
+            jvbPluginWrapper.destroy();
         }
         catch ( Exception ex )
         {
@@ -469,7 +468,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         Log.info("OfMeet Plugin - joinedCluster");
         try
         {
-            jitsiPluginWrapper.destroy();
+            jvbPluginWrapper.destroy();
         }
         catch ( Exception ex )
         {
@@ -488,7 +487,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         Log.info("OfMeet Plugin - leftCluster");
         try
         {
-            jitsiPluginWrapper.initialize( manager, pluginDirectory );
+            jvbPluginWrapper.initialize( manager, pluginDirectory );
         }
         catch ( Exception ex )
         {
@@ -507,7 +506,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         Log.info("OfMeet Plugin - markedAsSeniorClusterMember");
         try
         {
-            jitsiPluginWrapper.initialize( manager, pluginDirectory );
+            jvbPluginWrapper.initialize( manager, pluginDirectory );
         }
         catch ( Exception ex )
         {
@@ -517,7 +516,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public Videobridge getVideobridge()
     {
-        return this.jitsiPluginWrapper.getVideobridge();
+        return this.jvbPluginWrapper.getVideobridge();
     }
 
     public void setRecording(String roomName, String path)

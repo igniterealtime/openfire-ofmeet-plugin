@@ -1,12 +1,8 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import org.jitsi.meet.OSGi;
 import org.jivesoftware.openfire.container.PluginClassLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jitsi.videobridge.Conference;
-import org.jitsi.videobridge.HarvesterConfiguration;
-import org.jitsi.videobridge.VideoChannel;
 import org.jitsi.videobridge.Videobridge;
 import org.jitsi.videobridge.openfire.PluginImpl;
 import org.jivesoftware.openfire.container.Plugin;
@@ -24,9 +20,9 @@ import java.util.Map;
  *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
-public class JitsiPluginWrapper
+public class JvbPluginWrapper
 {
-    private static final Logger Log = LoggerFactory.getLogger(JitsiPluginWrapper.class );
+    private static final Logger Log = LoggerFactory.getLogger(JvbPluginWrapper.class);
 
     private PluginImpl jitsiPlugin;
 
