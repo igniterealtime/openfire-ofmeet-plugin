@@ -18,21 +18,26 @@ package org.jivesoftware.openfire.plugin.ofmeet.videobridge;
 
 import org.ice4j.ice.harvest.MappingCandidateHarvesters;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
+import org.igniterealtime.openfire.plugins.ofmeet.modularity.Module;
+import org.igniterealtime.openfire.plugins.ofmeet.modularity.ModuleClassLoader;
 import org.jitsi.impl.neomedia.transform.srtp.SRTPCryptoContext;
-import org.jivesoftware.openfire.container.PluginClassLoader;
+import org.jivesoftware.openfire.container.PluginServlet;
 import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jitsi.videobridge.Videobridge;
 import org.jitsi.videobridge.openfire.PluginImpl;
-import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A wrapper object for the Jitsi Videobridge Openfire plugin.
@@ -42,7 +47,7 @@ import java.util.Map;
  *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
-public class JvbPluginWrapper
+public class JvbPluginWrapper implements Module
 {
     private static final Logger Log = LoggerFactory.getLogger(JvbPluginWrapper.class);
 
@@ -50,10 +55,9 @@ public class JvbPluginWrapper
 
     /**
      * Initialize the wrapped component.
-     *
-     * @throws Exception On any problem.
      */
-    public synchronized void initialize(final PluginManager manager, final File pluginDirectory) throws Exception
+    @Override
+    public synchronized void initialize( final PluginManager manager, final File pluginDirectory, final ModuleClassLoader moduleClassLoader )
     {
         Log.debug( "Initializing Jitsi Videobridge..." );
 
@@ -62,33 +66,25 @@ public class JvbPluginWrapper
             Log.warn( "Another Jitsi Videobridge appears to have been initialized earlier! Unexpected behavior might be the result of this new initialization!" );
         }
 
-        populateJitsiSystemPropertiesWithJivePropertyValues();
+        reloadConfiguration();
 
         // Disable health check. Our JVB is not an external component, so there's no need to check for its connectivity.
         System.setProperty( "org.jitsi.videobridge.PING_INTERVAL", "-1" );
 
         jitsiPlugin = new PluginImpl();
 
-        // Override the classloader used by the wrapped plugin with the classloader of ofmeet plugin.
-        // TODO Find a way that does not depend on reflection.
-        final Field field = manager.getClass().getDeclaredField( "classloaders" );
-        final boolean wasAccessible = field.isAccessible();
-        field.setAccessible( true );
+        // Override the classloader used by the wrapped plugin with the classloader of relevant module in ofmeet plugin.
+        final ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         try
         {
-            final Map<Plugin, PluginClassLoader> classloaders = (Map<Plugin, PluginClassLoader>) field.get( manager );
-            classloaders.put( jitsiPlugin, manager.getPluginClassloader( manager.getPlugin( "ofmeet" ) ) );
-
+            Thread.currentThread().setContextClassLoader( moduleClassLoader );
             jitsiPlugin.initializePlugin( manager, pluginDirectory );
-
-            // The reference to the classloader is no longer needed in the plugin manager. Better clean up immediately.
-            // (ordinary, we'd do this in the 'destroy' method of this class, but there doesn't seem a need to wait).
-            classloaders.remove( jitsiPlugin );
         }
         finally
         {
-            field.setAccessible( wasAccessible );
+            Thread.currentThread().setContextClassLoader( oldClassLoader );
         }
+
         Log.trace( "Successfully initialized Jitsi Videobridge." );
     }
 
@@ -97,7 +93,8 @@ public class JvbPluginWrapper
      *
      * @throws Exception On any problem.
      */
-    public synchronized void destroy() throws Exception
+    @Override
+    public synchronized void destroy()
     {
         Log.debug( "Destroying Jitsi Videobridge..." );
 
@@ -119,7 +116,8 @@ public class JvbPluginWrapper
      * Jitsi takes most of its configuration through system properties. This method sets these
      * properties, using values defined in JiveGlobals.
      */
-    public void populateJitsiSystemPropertiesWithJivePropertyValues()
+    @Override
+    public void reloadConfiguration()
     {
         if ( JiveGlobals.getProperty( SRTPCryptoContext.CHECK_REPLAY_PNAME ) != null )
         {
@@ -166,5 +164,38 @@ public class JvbPluginWrapper
 
         // allow videobridge access without focus
         System.setProperty( Videobridge.DEFAULT_OPTIONS_PROPERTY_NAME, "2" );
+    }
+
+    @Override
+    public Map<String, String> getServlets()
+    {
+        final Map<String, String> servlets = new ConcurrentHashMap<>(  );
+        servlets.put( "/jitsi-videobridge.jsp", "org.jivesoftware.openfire.plugin.jitsivideobridge.jitsi_002dvideobridge_jsp" );
+
+        return servlets;
+    }
+
+    private GenericServlet instantiateServlet( final String servletClassname ) throws ClassNotFoundException, IllegalAccessException, InstantiationException, ServletException, NoSuchFieldException
+    {
+        final Class<?> theClass = getClass().getClassLoader().loadClass( servletClassname );
+
+        final Object instance = theClass.newInstance();
+        if ( !(instance instanceof GenericServlet) )
+        {
+            throw new IllegalArgumentException( "Could not load servlet instance" );
+        }
+
+        // TODO find better way than using reflection to get the servletConfig instance.
+        Field field = PluginServlet.class.getDeclaredField( "servletConfig" );
+        field.setAccessible( true );
+        try {
+            ( (GenericServlet) instance ).init( (ServletConfig) field.get( null ) );
+        }
+        finally
+        {
+            field.setAccessible( false );
+        }
+
+        return ( (GenericServlet) instance );
     }
 }

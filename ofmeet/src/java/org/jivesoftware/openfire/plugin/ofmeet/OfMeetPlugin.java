@@ -20,11 +20,15 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.dom4j.Element;
+import org.igniterealtime.openfire.plugins.ofmeet.modularity.Module;
+import org.igniterealtime.openfire.plugins.ofmeet.modularity.ModuleClassLoader;
+import org.igniterealtime.openfire.plugins.ofmeet.modularity.ModuleManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.container.PluginServlet;
 import org.jivesoftware.openfire.event.SessionEventDispatcher;
 import org.jivesoftware.openfire.event.SessionEventListener;
 import org.jivesoftware.openfire.interceptor.InterceptorManager;
@@ -32,7 +36,6 @@ import org.jivesoftware.openfire.net.SASLAuthentication;
 import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetAzure;
 import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslProvider;
 import org.jivesoftware.openfire.plugin.ofmeet.sasl.OfMeetSaslServer;
-import org.jivesoftware.openfire.plugin.ofmeet.videobridge.JvbPluginWrapper;
 import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.util.JiveGlobals;
@@ -41,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
 
+import javax.servlet.GenericServlet;
 import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -48,8 +52,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
@@ -58,20 +61,27 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
 
+    private static final LinkedHashMap<String, String> MODULE_CONFIG = new LinkedHashMap<>(); // LinkedHashMap maintains insertion order, which allows modules to be loaded in the correct order.
+    static {
+        MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofmeet.videobridge.JvbPluginWrapper", "lib-videobridge" );
+    }
+
     public boolean restartNeeded = false;
 
-    private PluginManager manager;
     public File pluginDirectory;
 
     private WebappWrapper webappWrapper;
     private BookmarkInterceptor bookmarkInterceptor;
 
-    private final JvbPluginWrapper jvbPluginWrapper;
+    private final ModuleManager moduleManager = new ModuleManager( this );
+
+
+    //private final JvbPluginWrapper jvbPluginWrapper;
     private final MeetingPlanner meetingPlanner;
 
     public OfMeetPlugin()
     {
-        jvbPluginWrapper = new JvbPluginWrapper();
+        //jvbPluginWrapper = new JvbPluginWrapper();
         meetingPlanner = new MeetingPlanner();
     }
 
@@ -87,8 +97,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
-        this.manager = manager;
         this.pluginDirectory = pluginDirectory;
+
+        this.moduleManager.start( Thread.currentThread().getContextClassLoader(), manager, pluginDirectory );
 
         // Initialize all Jitsi software, which provided the video-conferencing functionality.
         try
@@ -97,13 +108,13 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "." );
             System.setProperty( "net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath() );
             System.setProperty( "net.java.sip.communicator.SC_LOG_DIR_LOCATION",   pluginDirectory.getAbsolutePath() );
-
-            jvbPluginWrapper.initialize( manager, pluginDirectory );
         }
         catch ( Exception ex )
         {
             Log.error( "An exception occurred while attempting to initialize the Jitsi components.", ex );
         }
+
+        loadAllModules();
 
         // Initialize our own additional functionality providers.
         try
@@ -195,14 +206,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             Log.error( "An exception occurred while trying to destroy the OFMeet IQ Handler.", ex );
         }
 
-        try
-        {
-            jvbPluginWrapper.destroy();
-        }
-        catch ( Exception ex )
-        {
-            Log.error( "An exception occurred while trying to destroy the Jitsi Videobridge plugin wrapper.", ex );
-        }
+        unloadAllModules();
 
         ClusterManager.removeListener(this);
 
@@ -210,6 +214,38 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {
             InterceptorManager.getInstance().removeInterceptor( bookmarkInterceptor );
             bookmarkInterceptor = null;
+        }
+
+        this.moduleManager.stop();
+    }
+
+    private void loadAllModules()
+    {
+        for ( final Map.Entry<String, String> config : MODULE_CONFIG.entrySet() )
+        {
+            try
+            {
+                moduleManager.loadModule( config.getKey(), pluginDirectory.toPath().resolve( config.getValue() ) );
+            }
+            catch ( Exception e )
+            {
+                Log.error( "An unexpected exception occurred while trying to start the '{}' module from '{}'.", config.getKey(), config.getValue(), e );
+            }
+        }
+    }
+
+    private void unloadAllModules()
+    {
+        for ( final Map.Entry<String, String> config : MODULE_CONFIG.entrySet() )
+        {
+            try
+            {
+                moduleManager.unloadModule( config.getKey() );
+            }
+            catch ( Exception e )
+            {
+                Log.error( "An unexpected exception occurred while trying to destroy the '{}' module from '{}'.", config.getKey(), config.getValue(), e );
+            }
         }
     }
 
@@ -220,10 +256,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
      */
     public void populateJitsiSystemPropertiesWithJivePropertyValues()
     {
-        if ( jvbPluginWrapper != null )
-        {
-            jvbPluginWrapper.populateJitsiSystemPropertiesWithJivePropertyValues();
-        }
+        moduleManager.reloadAllConfiguration();
     }
 
     private void checkDownloadFolder(File pluginDirectory)
@@ -273,15 +306,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void joinedCluster()
     {
-        Log.info("OfMeet Plugin - joinedCluster");
-        try
-        {
-            jvbPluginWrapper.destroy();
-        }
-        catch ( Exception ex )
-        {
-            Log.error( "An exception occurred while trying to destroy the Jitsi Plugin.", ex );
-        }
+        Log.info( "An Openfire cluster was joined. Unloading all OFMeet functionality (as only the senior cluster node will provide this." );
+        unloadAllModules();
     }
 
     @Override
@@ -292,10 +318,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void leftCluster()
     {
-        Log.info("OfMeet Plugin - leftCluster");
+        Log.info( "An Openfire cluster was left. Loading all OFMeet functionality." );
         try
         {
-            jvbPluginWrapper.initialize( manager, pluginDirectory );
+            unloadAllModules(); // just in case we _were_ the senior cluster node.
+            loadAllModules();
         }
         catch ( Exception ex )
         {
@@ -311,10 +338,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     @Override
     public void markedAsSeniorClusterMember()
     {
-        Log.info("OfMeet Plugin - markedAsSeniorClusterMember");
+        Log.info( "This instance was marked as senior member of an Openfire cluster. Loading all OFMeet functionality." );
         try
         {
-            jvbPluginWrapper.initialize( manager, pluginDirectory );
+            unloadAllModules(); // just in case we _were_ the senior cluster node.
+            loadAllModules();
         }
         catch ( Exception ex )
         {

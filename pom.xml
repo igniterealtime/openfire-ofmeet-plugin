@@ -33,6 +33,7 @@
     </properties>
 
     <modules>
+        <module>modularity</module>
         <module>web</module>
         <module>config</module>
         <module>ofmeet</module>
@@ -100,7 +101,7 @@
             <dependency>
                 <groupId>org.jitsi</groupId>
                 <artifactId>jitsi-videobridge-openfire</artifactId>
-                <version>2.5-20180625.114129-4</version>
+                <version>2.6-20180801.081119-1</version>
             </dependency>
             <dependency>
                 <groupId>org.igniterealtime.openfire</groupId>
@@ -133,6 +134,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>videobridge</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>modularity</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
