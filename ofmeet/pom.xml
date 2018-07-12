@@ -125,8 +125,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.jitsi</groupId>
-            <artifactId>jitsi-videobridge-openfire</artifactId>
+            <groupId>org.igniterealtime.openfire.ofmeet</groupId>
+            <artifactId>videobridge</artifactId>
         </dependency>
 
         <dependency>

@@ -36,6 +36,7 @@
         <module>web</module>
         <module>config</module>
         <module>ofmeet</module>
+        <module>videobridge</module>
         <module>offocus</module>
     </modules>
 
@@ -129,7 +130,11 @@
                 <artifactId>offocus</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>videobridge</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
