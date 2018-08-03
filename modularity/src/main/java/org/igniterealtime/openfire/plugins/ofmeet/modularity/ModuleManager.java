@@ -106,7 +106,7 @@ public class ModuleManager
         try
         {
             Thread.currentThread().setContextClassLoader( classLoader );
-            module.initialize( manager, pluginDirectory, classLoader );
+            module.initialize( manager, pluginDirectory );
 
             Log.trace( "Registering module servlets (if any)." );
             final Map<String, String> servlets = module.getServlets();
@@ -134,6 +134,10 @@ public class ModuleManager
     {
         Log.debug( "Unloading module '{}'.", moduleClassname );
         final Module module = modulesByClassName.remove( moduleClassname );
+        if ( module == null )
+        {
+            return;
+        }
 
         Log.trace( "Deregistering module servlets (if any)." );
         final Map<String, String> servlets = module.getServlets();

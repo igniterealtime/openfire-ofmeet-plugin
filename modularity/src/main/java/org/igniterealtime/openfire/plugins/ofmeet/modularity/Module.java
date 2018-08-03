@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public interface Module
 {
-    void initialize( final PluginManager manager, final File pluginDirectory, final ModuleClassLoader classLoader );
+    void initialize( final PluginManager manager, final File pluginDirectory );
 
     void destroy();
 

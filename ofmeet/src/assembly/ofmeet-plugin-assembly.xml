@@ -14,13 +14,47 @@
   ~ limitations under the License.
   -->
 
-<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
-    <id>ofmeet-plugin-assembly</id>
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">   <id>ofmeet-plugin-assembly</id>
     <formats>
         <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
+
+    <!--
+        The OFMeet plugin is an aggregation of various Jitsi projects. These projects have some conflicting dependencies.
+        The OFMeet plugin handles these by using a class loading mechanism that loads dependencies for each Jitsi project
+        from a different 'lib' folder (as opposed to a plugin that contains all dependencies in one 'lib' folder). This
+        assembly descriptor creates these different 'lib' folders. Note that moduleSets are used to capture each of the
+        Jitsi projects, and explicitly not dependencySets. Using dependencySets instead of moduleSets introduces a problem,
+        as dependencySets use only the dependencies that have been de-duplicated and filtered for conflict by the Maven
+        dependency management mechanism. This causes conflicting dependencies to not be included (which typically is a
+        good thing, but is the exact opposite of what we're trying to do with this very specific plugin). -->
+    <moduleSets>
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>org.igniterealtime.openfire.ofmeet:videobridge</include>
+            </includes>
+            <binaries>
+                <unpack>false</unpack>
+                <outputDirectory>lib-videobridge</outputDirectory>
+            </binaries>
+        </moduleSet>
+
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>org.igniterealtime.openfire.ofmeet:offocus</include>
+            </includes>
+            <binaries>
+                <unpack>false</unpack>
+                <outputDirectory>lib-jicofo</outputDirectory>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+
     <fileSets>
 
         <!-- metadata files (readme, icons, etc). -->
@@ -118,19 +152,11 @@
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
             <useProjectArtifact>true</useProjectArtifact>
+            <!-- Exclude the modules (and their transitive dependencies) that go in separate 'lib' folders. -->
             <excludes>
                 <exclude>org.igniterealtime.openfire.ofmeet:videobridge</exclude>
+                <exclude>org.igniterealtime.openfire.ofmeet:offocus</exclude>
             </excludes>
-            <useTransitiveDependencies>true</useTransitiveDependencies>
-            <useTransitiveFiltering>true</useTransitiveFiltering>
-        </dependencySet>
-
-        <dependencySet>
-            <outputDirectory>lib-videobridge</outputDirectory>
-            <useProjectArtifact>false</useProjectArtifact>
-            <includes>
-                <include>org.igniterealtime.openfire.ofmeet:videobridge</include>
-            </includes>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useTransitiveFiltering>true</useTransitiveFiltering>
         </dependencySet>

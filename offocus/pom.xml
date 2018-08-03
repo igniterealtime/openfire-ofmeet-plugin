@@ -31,50 +31,13 @@
 
     <build>
         <sourceDirectory>src/java</sourceDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.6</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.igniterealtime.openfire.plugins</groupId>
-                        <artifactId>openfire-plugin-assembly-descriptor</artifactId>
-                        <version>${openfire.version}</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>${project.artifactId}</finalName>
-                            <attach>false</attach>
-                            <!-- This is where we use our shared assembly descriptor -->
-                            <descriptorRefs>
-                                <descriptorRef>openfire-plugin-assembly</descriptorRef>
-                            </descriptorRefs>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Fix for Mina 2.x -->
-            <!-- https://issues.apache.org/jira/browse/DIRMINA-919 -->
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.0.0</version>
-                <extensions>true</extensions>
-            </plugin>
-        </plugins>
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.igniterealtime.openfire.ofmeet</groupId>
+            <artifactId>modularity</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.igniterealtime.openfire.ofmeet</groupId>
             <artifactId>config</artifactId>

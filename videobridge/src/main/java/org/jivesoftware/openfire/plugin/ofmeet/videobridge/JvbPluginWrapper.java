@@ -57,7 +57,7 @@ public class JvbPluginWrapper implements Module
      * Initialize the wrapped component.
      */
     @Override
-    public synchronized void initialize( final PluginManager manager, final File pluginDirectory, final ModuleClassLoader moduleClassLoader )
+    public synchronized void initialize( final PluginManager manager, final File pluginDirectory )
     {
         Log.debug( "Initializing Jitsi Videobridge..." );
 
@@ -72,18 +72,7 @@ public class JvbPluginWrapper implements Module
         System.setProperty( "org.jitsi.videobridge.PING_INTERVAL", "-1" );
 
         jitsiPlugin = new PluginImpl();
-
-        // Override the classloader used by the wrapped plugin with the classloader of relevant module in ofmeet plugin.
-        final ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        try
-        {
-            Thread.currentThread().setContextClassLoader( moduleClassLoader );
-            jitsiPlugin.initializePlugin( manager, pluginDirectory );
-        }
-        finally
-        {
-            Thread.currentThread().setContextClassLoader( oldClassLoader );
-        }
+        jitsiPlugin.initializePlugin( manager, pluginDirectory );
 
         Log.trace( "Successfully initialized Jitsi Videobridge." );
     }
@@ -173,29 +162,5 @@ public class JvbPluginWrapper implements Module
         servlets.put( "/jitsi-videobridge.jsp", "org.jivesoftware.openfire.plugin.jitsivideobridge.jitsi_002dvideobridge_jsp" );
 
         return servlets;
-    }
-
-    private GenericServlet instantiateServlet( final String servletClassname ) throws ClassNotFoundException, IllegalAccessException, InstantiationException, ServletException, NoSuchFieldException
-    {
-        final Class<?> theClass = getClass().getClassLoader().loadClass( servletClassname );
-
-        final Object instance = theClass.newInstance();
-        if ( !(instance instanceof GenericServlet) )
-        {
-            throw new IllegalArgumentException( "Could not load servlet instance" );
-        }
-
-        // TODO find better way than using reflection to get the servletConfig instance.
-        Field field = PluginServlet.class.getDeclaredField( "servletConfig" );
-        field.setAccessible( true );
-        try {
-            ( (GenericServlet) instance ).init( (ServletConfig) field.get( null ) );
-        }
-        finally
-        {
-            field.setAccessible( false );
-        }
-
-        return ( (GenericServlet) instance );
     }
 }

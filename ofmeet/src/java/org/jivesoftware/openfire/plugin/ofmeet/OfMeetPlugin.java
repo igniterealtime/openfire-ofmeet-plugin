@@ -64,6 +64,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private static final LinkedHashMap<String, String> MODULE_CONFIG = new LinkedHashMap<>(); // LinkedHashMap maintains insertion order, which allows modules to be loaded in the correct order.
     static {
         MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofmeet.videobridge.JvbPluginWrapper", "lib-videobridge" );
+        MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofmeet.JitsiJicofoWrapper", "lib-jicofo" );
     }
 
     public boolean restartNeeded = false;
