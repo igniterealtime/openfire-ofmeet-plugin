@@ -607,4 +607,17 @@ public class OFMeetConfig
     {
         JiveGlobals.deleteProperty( "ofmeet.webrtcIceTcpDisable" );
     }
+
+    public final StringProperty jigasiPassword = new StringProperty( "ofmeet.jigasi.password", "" );
+    public StringProperty getJigasiPassword() { return jigasiPassword; }
+
+    public final StringProperty jigasiServerAddress = new StringProperty( "ofmeet.jigasi.server-address", null );
+    public StringProperty getJigasiServerAddress() { return jigasiServerAddress; }
+
+    public final StringProperty jigasiUserId = new StringProperty( "ofmeet.jigasi.user-id", null );
+    public StringProperty getJigasiUserId() { return jigasiUserId; }
+
+    public final StringProperty jigasiDomainBase = new StringProperty( "ofmeet.jigasi.domain-base", null );
+    public StringProperty getJigasiDomainBase() { return jigasiDomainBase; }
+
 }

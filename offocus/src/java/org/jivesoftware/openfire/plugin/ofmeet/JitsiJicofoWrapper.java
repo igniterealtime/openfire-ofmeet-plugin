@@ -19,7 +19,6 @@ package org.jivesoftware.openfire.plugin.ofmeet;
 import org.dom4j.Element;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.igniterealtime.openfire.plugins.ofmeet.modularity.Module;
-import org.igniterealtime.openfire.plugins.ofmeet.modularity.ModuleClassLoader;
 import org.jitsi.jicofo.FocusManager;
 import org.jitsi.jicofo.JvbDoctor;
 import org.jitsi.jicofo.osgi.JicofoBundleConfig;

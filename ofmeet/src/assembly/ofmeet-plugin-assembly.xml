@@ -53,6 +53,17 @@
                 <outputDirectory>lib-jicofo</outputDirectory>
             </binaries>
         </moduleSet>
+
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>org.igniterealtime.openfire.ofmeet:ofgasi</include>
+            </includes>
+            <binaries>
+                <unpack>false</unpack>
+                <outputDirectory>lib-jigasi</outputDirectory>
+            </binaries>
+        </moduleSet>
     </moduleSets>
 
     <fileSets>
@@ -156,6 +167,7 @@
             <excludes>
                 <exclude>org.igniterealtime.openfire.ofmeet:videobridge</exclude>
                 <exclude>org.igniterealtime.openfire.ofmeet:offocus</exclude>
+                <exclude>org.igniterealtime.openfire.ofmeet:ofgasi</exclude>
             </excludes>
             <useTransitiveDependencies>true</useTransitiveDependencies>
             <useTransitiveFiltering>true</useTransitiveFiltering>

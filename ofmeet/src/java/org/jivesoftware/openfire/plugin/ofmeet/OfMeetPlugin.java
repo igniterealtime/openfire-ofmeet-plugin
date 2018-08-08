@@ -20,15 +20,12 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.dom4j.Element;
-import org.igniterealtime.openfire.plugins.ofmeet.modularity.Module;
-import org.igniterealtime.openfire.plugins.ofmeet.modularity.ModuleClassLoader;
 import org.igniterealtime.openfire.plugins.ofmeet.modularity.ModuleManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
-import org.jivesoftware.openfire.container.PluginServlet;
 import org.jivesoftware.openfire.event.SessionEventDispatcher;
 import org.jivesoftware.openfire.event.SessionEventListener;
 import org.jivesoftware.openfire.interceptor.InterceptorManager;
@@ -44,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.IQ;
 
-import javax.servlet.GenericServlet;
 import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -52,7 +48,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
@@ -62,7 +61,9 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
 
     private static final LinkedHashMap<String, String> MODULE_CONFIG = new LinkedHashMap<>(); // LinkedHashMap maintains insertion order, which allows modules to be loaded in the correct order.
-    static {
+    static
+    {
+        MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofgasi.JigasiWrapper", "lib-jigasi" );
         MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofmeet.videobridge.JvbPluginWrapper", "lib-videobridge" );
         MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofmeet.JitsiJicofoWrapper", "lib-jicofo" );
     }
@@ -106,7 +107,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         try
         {
             System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_LOCATION",  pluginDirectory.getAbsolutePath() );
-            System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "." );
+            System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "classes" );
             System.setProperty( "net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath() );
             System.setProperty( "net.java.sip.communicator.SC_LOG_DIR_LOCATION",   pluginDirectory.getAbsolutePath() );
         }

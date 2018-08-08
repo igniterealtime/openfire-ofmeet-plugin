@@ -39,6 +39,7 @@
         <module>ofmeet</module>
         <module>videobridge</module>
         <module>offocus</module>
+        <module>ofgasi</module>
     </modules>
 
     <licenses>
@@ -134,6 +135,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>videobridge</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.igniterealtime.openfire.ofmeet</groupId>
+                <artifactId>ofgasi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
