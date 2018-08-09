@@ -161,16 +161,28 @@ public class ModuleManager
 
     public synchronized void reloadAllConfiguration()
     {
-        for ( final Module module : classLoaderByModule.keySet() )
+        final ClassLoader oldLoader = Thread.currentThread().getContextClassLoader();
+        try
         {
-            try
+            for ( final Map.Entry<Module, ModuleClassLoader> entry : classLoaderByModule.entrySet() )
             {
-                module.reloadConfiguration();
+                final Module module = entry.getKey();
+                final ClassLoader moduleClassLoader = entry.getValue();
+
+                Thread.currentThread().setContextClassLoader( moduleClassLoader );
+                try
+                {
+                    module.reloadConfiguration();
+                }
+                catch ( Exception e )
+                {
+                    Log.warn( "An exception occurred while reloading the configuration of module '{}'.", module, e );
+                }
             }
-            catch ( Exception e )
-            {
-                Log.warn( "An exception occurred while reloading the configuration of module '{}'.", module, e );
-            }
+        }
+        finally
+        {
+            Thread.currentThread().setContextClassLoader( oldLoader );
         }
     }
 

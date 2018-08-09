@@ -17,6 +17,7 @@
 package org.jivesoftware.openfire.plugin.ofgasi;
 
 import net.java.sip.communicator.impl.configuration.ConfigurationActivator;
+import net.java.sip.communicator.impl.protocol.sip.ProtocolProviderServiceSipImpl;
 import net.java.sip.communicator.service.protocol.OperationSetBasicTelephony;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.igniterealtime.openfire.plugins.ofmeet.modularity.Module;
@@ -38,14 +39,12 @@ import org.xmpp.component.ComponentException;
 import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.Base64;
-import java.util.Enumeration;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -178,7 +177,7 @@ public class JigasiWrapper implements Module
     {
         this.pluginDirectory = pluginDirectory;
 
-        reloadSystemProperties();
+        reloadConfiguration();
 
         try
         {
@@ -197,9 +196,6 @@ public class JigasiWrapper implements Module
             // configuration of one bundle while starting another bundle.
             Log.warn( "The OSGi class is loaded by a class loader different from the one that's loading this module. This suggests that residual configuration is in the OSGi class instance, which is likely to prevent Jicofo from functioning correctly." );
         }
-        final OSGiBundleConfig osgiBundles = new JigasiBundleConfig();
-        OSGi.setBundleConfig( osgiBundles );
-        OSGi.setClassLoader( Thread.currentThread().getContextClassLoader() );
 
         reloadConfiguration();
     }
@@ -216,10 +212,10 @@ public class JigasiWrapper implements Module
         // Find the root path of the class that will be our plugin lib folder.
         String binaryPath = (new URL( CallControlComponent.class.getProtectionDomain().getCodeSource().getLocation(), ".")).openConnection().getPermission().getName();
 
-        File pluginJarfile = new File(binaryPath);
-        File nativeLibFolder = new File(pluginJarfile.getParentFile(), "native");
+        File jigasiJarFile = new File(binaryPath);
+        File nativeLibFolder = new File(jigasiJarFile.getParentFile(), "native");
 
-        if(!nativeLibFolder.exists())
+        if(!nativeLibFolder.exists() || nativeLibFolder.listFiles().length == 0 )
         {
             // Lets find the appropriate jar file to extract and extract it.
             String archiveFileSuffix = null;
@@ -240,28 +236,29 @@ public class JigasiWrapper implements Module
             {
                 Log.warn( "Unable to determine what the native libraries are for this OS." );
             }
-            else if ( nativeLibFolder.mkdirs() )
+            else if ( nativeLibFolder.exists() || nativeLibFolder.mkdirs() )
             {
-                String nativeLibsArchivePath = pluginJarfile.getCanonicalPath();
+                // The name of the native library is the same as the name of the jigasi jar, but has a different ending.
+                String nativeLibsJarPath = jigasiJarFile.getCanonicalPath();
+                nativeLibsJarPath = nativeLibsJarPath.replaceFirst( "\\.jar", archiveFileSuffix );
 
-                Log.debug("Applicable archive with native libraries: '{}'", nativeLibsArchivePath);
-                JarFile archive = new JarFile( nativeLibsArchivePath );
+                Log.debug("Applicable archive with native libraries: '{}'", nativeLibsJarPath);
+                JarFile archive = new JarFile( nativeLibsJarPath );
+
                 Enumeration en = archive.entries();
 
-                // The directory of interest within the archive has this structure:
-                // /jigasi-linux-x64-1.1-SNAPSHOT/lib/native/linux-64/
                 while ( en.hasMoreElements() )
                 {
                     try
                     {
                         JarEntry archiveEntry = (JarEntry) en.nextElement();
                         Log.debug( "Iterating over: {}", archiveEntry.getName() );
-                        if ( archiveEntry.isDirectory() || !archiveEntry.getName().contains( "/native/" ) )
+                        if ( archiveEntry.isDirectory() || archiveEntry.getName().contains( "/" ) )
                         {
-                            // Skip everything that's not in the 'native' directory of the archive.
+                            // Skip everything that's not in the root directory of the archive.
                             continue;
                         }
-                        final File extractedFile = new File( nativeLibFolder, archiveEntry.getName().substring( archiveEntry.getName().lastIndexOf( '/' ) ) );
+                        final File extractedFile = new File( nativeLibFolder, archiveEntry.getName() );
                         Log.debug( "Copying file '{}' from native library into '{}'.", archiveEntry, extractedFile );
 
                         try ( InputStream is = archive.getInputStream( archiveEntry );
@@ -278,6 +275,33 @@ public class JigasiWrapper implements Module
                         Log.warn( "An unexpected error occurred while copying native libraries.", t );
                     }
                 }
+
+                // When running on Linux, jitsi-sysactivity needs another native library.
+                if ( OSUtils.IS_LINUX ) {
+                    final Path start = jigasiJarFile.getParentFile().toPath();
+                    final int maxDepth = 1;
+                    Files.find( start, maxDepth, ( path, basicFileAttributes ) -> path.getFileName().toString().startsWith( "libunix" ) && path.getFileName().toString().endsWith( ".so" ) )
+                        .forEach(path -> {
+                            final Path target = path.getParent().resolve( "native" ).resolve( "libunix-java.so" );
+                            Log.debug( "Create a symbolic link target '{}' for native file '{}'", target, path );
+                            try
+                            {
+                                Files.createSymbolicLink( target, path );
+                            }
+                            catch ( IOException e )
+                            {
+                                Log.debug( "Unable to create a symbolic link target '{}' for native file '{}'. Will attempt to copy instead.", target, path );
+                                try
+                                {
+                                    Files.copy( target, path );
+                                }
+                                catch ( IOException e1 )
+                                {
+                                    Log.warn( "Unable to move native file '{}' into folder containing natives.", path, e1 );
+                                }
+                            }
+                        } );
+                }
                 Log.info( "Native lib folder created and natives extracted" );
             }
             else
@@ -290,16 +314,20 @@ public class JigasiWrapper implements Module
             Log.info( "Native lib folder already exist." );
         }
 
-        String newLibPath = nativeLibFolder.getCanonicalPath() + File.pathSeparator + System.getProperty("java.library.path");
-        System.setProperty("java.library.path", newLibPath);
+        if ( nativeLibFolder.exists() )
+        {
+            String newLibPath = nativeLibFolder.getCanonicalPath() + File.pathSeparator + System.getProperty( "java.library.path" );
+            System.setProperty( "java.library.path", newLibPath );
 
-        // this will reload the new setting
-        Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths");
-        fieldSysPath.setAccessible(true);
-        fieldSysPath.set(System.class.getClassLoader(), null);
+            // this will reload the new setting
+            Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
+            fieldSysPath.setAccessible( true );
+            fieldSysPath.set( System.class.getClassLoader(), null );
+        }
     }
 
-    protected void reloadSystemProperties()
+    @Override
+    public void reloadConfiguration()
     {
         int maxPort = MAX_PORT_ARG_VALUE;
 
@@ -355,12 +383,6 @@ public class JigasiWrapper implements Module
 
         // make sure we use the properties files for configuration
         System.setProperty( ConfigurationActivator.PNAME_USE_PROPFILE_CONFIG, "true" );
-    }
-
-    @Override
-    public void reloadConfiguration()
-    {
-        reloadSystemProperties();
 
         // The CallControlComponent implementation expects to be an External Component,
         // which in the case of an Openfire plugin is untrue. As a result, most
@@ -394,6 +416,36 @@ public class JigasiWrapper implements Module
         // Restart if possible
         if (canBeUsed())
         {
+            // Set the SIP account details to be used. Ideally, you'd want to set this through
+            // JigasiBundleActivator.getConfigurationService(). That can only be done after the OSGi context
+            // is started. By then, it's to late (as the OSGi context needs to be started with these settings).
+            // As a work-around, the property file is modified here directly).
+            final File sipCommunicatorPropertyFile = new File(this.getClass().getResource("/sip-communicator.properties").getFile());
+            final Properties sipCommunicatorProps = new Properties();
+            try ( final FileReader reader = new FileReader( sipCommunicatorPropertyFile );
+                  final FileWriter writer =  new FileWriter( sipCommunicatorPropertyFile ))
+            {
+                sipCommunicatorProps.load( reader );
+                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiPassword.get().getBytes() ) );
+                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.SERVER_ADDRESS", config.jigasiServerAddress.get() );
+                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.USER_ID", config.jigasiUserId.get() );
+                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.DOMAIN_BASE", config.jigasiDomainBase.get() );
+                sipCommunicatorProps.store( writer, null );
+            }
+            catch ( Exception e )
+            {
+                Log.warn( "Unable to provision account!", e );
+            }
+
+            // Note: we CANNOT load the bundle without an account! A NullPointerException will be thrown by:
+            // et.java.sip.communicator.service.protocol.ProtocolProviderFactory.createAccount(ProtocolProviderFactory.java:1109)
+            if ( OSGi.getBundleConfig() == null )
+            {
+                final OSGiBundleConfig osgiBundles = new JigasiBundleConfig();
+                OSGi.setBundleConfig( osgiBundles );
+                OSGi.setClassLoader( Thread.currentThread().getContextClassLoader() );
+            }
+
             componentManager = ComponentManagerFactory.getComponentManager();
             component = new CallControlComponent( hostname, port, domain, subdomain, secret );
 
@@ -403,14 +455,14 @@ public class JigasiWrapper implements Module
 
                 SmackConfiguration.DEBUG = false; // work-around needed until https://github.com/jitsi/jitsi/pull/515 is in the dependency that we use.
 
-                ConfigurationService configurationService = JigasiBundleActivator.getConfigurationService();
-
-                // This can only be reconfigured after the OSGi context has been started.
-                //configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.ACCOUNT_UID","SIP:john.doe@example.org" );
-                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiPassword.get().getBytes() ) );
-                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.SERVER_ADDRESS", config.jigasiServerAddress.get() );
-                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.USER_ID", config.jigasiUserId.get() );
-                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.DOMAIN_BASE", config.jigasiDomainBase.get() );
+//                ConfigurationService configurationService = JigasiBundleActivator.getConfigurationService();
+//
+//                // This can only be reconfigured after the OSGi context has been started.
+//                //configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.ACCOUNT_UID","SIP:john.doe@example.org" );
+//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiPassword.get().getBytes() ) );
+//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.SERVER_ADDRESS", config.jigasiServerAddress.get() );
+//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.USER_ID", config.jigasiUserId.get() );
+//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.DOMAIN_BASE", config.jigasiDomainBase.get() );
             }
             catch ( ComponentException ce )
             {
