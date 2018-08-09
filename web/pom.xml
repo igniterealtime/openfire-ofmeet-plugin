@@ -43,10 +43,10 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.2862.tar.bz2</url>
+                            <url>https://download.jitsi.org/jitsi-meet/src/jitsi-meet-1.0.2985.tar.bz2</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/upstream-jitsi-meet</outputDirectory>
-                            <md5>d6ec3f33014139024692b62e594cef60</md5>
+                            <md5>a913bfd3d7e64315f8b1bf7bca3c3231</md5>
                         </configuration>
                     </execution>
                 </executions>
