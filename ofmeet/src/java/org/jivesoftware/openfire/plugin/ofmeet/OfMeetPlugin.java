@@ -48,10 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Security;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
@@ -61,11 +58,18 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
 
     private static final LinkedHashMap<String, String> MODULE_CONFIG = new LinkedHashMap<>(); // LinkedHashMap maintains insertion order, which allows modules to be loaded in the correct order.
+
+    public static final String JIGASI_WRAPPER = "org.jivesoftware.openfire.plugin.ofgasi.JigasiWrapper";
+
+    public static final String JVB_PLUGIN_WRAPPER = "org.jivesoftware.openfire.plugin.ofmeet.videobridge.JvbPluginWrapper";
+
+    public static final String JICOFO_WRAPPER = "org.jivesoftware.openfire.plugin.ofmeet.JitsiJicofoWrapper";
+
     static
     {
-        MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofgasi.JigasiWrapper", "lib-jigasi" );
-        MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofmeet.videobridge.JvbPluginWrapper", "lib-videobridge" );
-        MODULE_CONFIG.put( "org.jivesoftware.openfire.plugin.ofmeet.JitsiJicofoWrapper", "lib-jicofo" );
+        MODULE_CONFIG.put( JIGASI_WRAPPER, "lib-jigasi" );
+        MODULE_CONFIG.put( JVB_PLUGIN_WRAPPER, "lib-videobridge" );
+        MODULE_CONFIG.put( JICOFO_WRAPPER, "lib-jicofo" );
     }
 
     public boolean restartNeeded = false;

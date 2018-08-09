@@ -17,16 +17,13 @@
 package org.jivesoftware.openfire.plugin.ofgasi;
 
 import net.java.sip.communicator.impl.configuration.ConfigurationActivator;
-import net.java.sip.communicator.impl.protocol.sip.ProtocolProviderServiceSipImpl;
 import net.java.sip.communicator.service.protocol.OperationSetBasicTelephony;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.igniterealtime.openfire.plugins.ofmeet.modularity.Module;
-import org.jitsi.jigasi.JigasiBundleActivator;
 import org.jitsi.jigasi.osgi.JigasiBundleConfig;
 import org.jitsi.jigasi.xmpp.CallControlComponent;
 import org.jitsi.meet.OSGi;
 import org.jitsi.meet.OSGiBundleConfig;
-import org.jitsi.service.configuration.ConfigurationService;
 import org.jitsi.service.neomedia.DefaultStreamConnector;
 import org.jitsi.util.OSUtils;
 import org.jivesoftware.openfire.XMPPServer;
@@ -176,8 +173,6 @@ public class JigasiWrapper implements Module
     public void initialize( final PluginManager manager, final File pluginDirectory )
     {
         this.pluginDirectory = pluginDirectory;
-
-        reloadConfiguration();
 
         try
         {
@@ -420,21 +415,27 @@ public class JigasiWrapper implements Module
             // JigasiBundleActivator.getConfigurationService(). That can only be done after the OSGi context
             // is started. By then, it's to late (as the OSGi context needs to be started with these settings).
             // As a work-around, the property file is modified here directly).
-            final File sipCommunicatorPropertyFile = new File(this.getClass().getResource("/sip-communicator.properties").getFile());
+            final File sipCommunicatorPropertyFile = new File(this.getClass().getResource( "/sip-communicator.properties" ).getFile());
             final Properties sipCommunicatorProps = new Properties();
-            try ( final FileReader reader = new FileReader( sipCommunicatorPropertyFile );
-                  final FileWriter writer =  new FileWriter( sipCommunicatorPropertyFile ))
+            try ( final FileReader reader = new FileReader( sipCommunicatorPropertyFile ) )
             {
                 sipCommunicatorProps.load( reader );
                 sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiPassword.get().getBytes() ) );
                 sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.SERVER_ADDRESS", config.jigasiServerAddress.get() );
                 sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.USER_ID", config.jigasiUserId.get() );
                 sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.DOMAIN_BASE", config.jigasiDomainBase.get() );
+            }
+            catch ( Exception e )
+            {
+                Log.warn( "Unable to read properties / add account info!", e );
+            }
+            try ( final FileWriter writer = new FileWriter( sipCommunicatorPropertyFile ) )
+            {
                 sipCommunicatorProps.store( writer, null );
             }
             catch ( Exception e )
             {
-                Log.warn( "Unable to provision account!", e );
+                Log.warn( "Unable to store properties / add account info!", e );
             }
 
             // Note: we CANNOT load the bundle without an account! A NullPointerException will be thrown by:
