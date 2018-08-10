@@ -28,8 +28,13 @@ import org.jitsi.service.neomedia.DefaultStreamConnector;
 import org.jitsi.util.OSUtils;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.XMPPServerInfo;
+import org.jivesoftware.openfire.auth.AuthFactory;
 import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.user.UserManager;
+import org.jivesoftware.openfire.user.UserProvider;
 import org.jivesoftware.smack.SmackConfiguration;
+import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.component.ComponentException;
@@ -55,7 +60,7 @@ import java.util.jar.JarFile;
  */
 public class JigasiWrapper implements Module
 {
-    private final Logger Log = LoggerFactory.getLogger( JigasiWrapper.class );
+    private static final Logger Log = LoggerFactory.getLogger( JigasiWrapper.class );
 
     /**
      * The name of the command-line argument which specifies the XMPP domain
@@ -189,7 +194,7 @@ public class JigasiWrapper implements Module
         {
             // the OSGi class should not be present in Openfire itself, or in the parent plugin of these modules. The OSGi implementation does not allow for more than one bundle to be configured/started, which leads to undesired re-used of
             // configuration of one bundle while starting another bundle.
-            Log.warn( "The OSGi class is loaded by a class loader different from the one that's loading this module. This suggests that residual configuration is in the OSGi class instance, which is likely to prevent Jicofo from functioning correctly." );
+            Log.warn( "The OSGi class is loaded by a class loader different from the one that's loading this module. This suggests that residual configuration is in the OSGi class instance, which is likely to prevent Jigasi from functioning correctly." );
         }
 
         reloadConfiguration();
@@ -324,6 +329,8 @@ public class JigasiWrapper implements Module
     @Override
     public void reloadConfiguration()
     {
+        ensureJigasiUser();
+
         int maxPort = MAX_PORT_ARG_VALUE;
 
         int minPort = MIN_PORT_ARG_VALUE;
@@ -420,10 +427,35 @@ public class JigasiWrapper implements Module
             try ( final FileReader reader = new FileReader( sipCommunicatorPropertyFile ) )
             {
                 sipCommunicatorProps.load( reader );
-                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiPassword.get().getBytes() ) );
-                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.SERVER_ADDRESS", config.jigasiServerAddress.get() );
-                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.USER_ID", config.jigasiUserId.get() );
-                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.DOMAIN_BASE", config.jigasiDomainBase.get() );
+
+                // SIP account (that will invite users, or receive inbound calls and merge them into the Meet)
+                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiSipPassword.get().getBytes() ) );
+                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.SERVER_ADDRESS", config.jigasiSipServerAddress.get() );
+                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.USER_ID", config.jigasiSipUserId.get() );
+                sipCommunicatorProps.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.DOMAIN_BASE", config.jigasiSipDomainBase.get() );
+
+                // XMPP account (which will join the MUC on behalf of the user joining via SIP.
+                boolean xmppAccountVerified = true;
+                try
+                {
+                    AuthFactory.getAuthProvider().authenticate( config.jigasiXmppUserId.get(), config.jigasiXmppPassword.get() );
+                }
+                catch ( Exception e )
+                {
+                    xmppAccountVerified = false;
+                }
+
+                if ( xmppAccountVerified || !JiveGlobals.getBooleanProperty( "xmpp.auth.anonymous" ) )
+                {
+                    // Use the XMPP account if it has been verified to work, or when anonymous access has been disabled (better to show that error than silently ignore things).
+                    sipCommunicatorProps.setProperty( "org.jitsi.jigasi.xmpp.acc.USER_ID", XMPPServer.getInstance().createJID( config.jigasiXmppUserId.get(), null ).toBareJID() );
+                    sipCommunicatorProps.setProperty( "org.jitsi.jigasi.xmpp.acc.PASS", config.jigasiXmppPassword.get() );
+                    sipCommunicatorProps.setProperty( "org.jitsi.jigasi.xmpp.acc.ANONYMOUS_AUTH", "false" );
+                }
+                else
+                {
+                    sipCommunicatorProps.setProperty( "org.jitsi.jigasi.xmpp.acc.ANONYMOUS_AUTH", "true" );
+                }
             }
             catch ( Exception e )
             {
@@ -460,10 +492,10 @@ public class JigasiWrapper implements Module
 //
 //                // This can only be reconfigured after the OSGi context has been started.
 //                //configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.ACCOUNT_UID","SIP:john.doe@example.org" );
-//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiPassword.get().getBytes() ) );
-//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.SERVER_ADDRESS", config.jigasiServerAddress.get() );
-//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.USER_ID", config.jigasiUserId.get() );
-//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.DOMAIN_BASE", config.jigasiDomainBase.get() );
+//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.PASSWORD", Base64.getEncoder().encodeToString( config.jigasiSipPassword.get().getBytes() ) );
+//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.SERVER_ADDRESS", config.jigasiSipServerAddress.get() );
+//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.USER_ID", config.jigasiSipUserId.get() );
+//                configurationService.setProperty( "net.java.sip.communicator.impl.protocol.sip.acc1403273890647.DOMAIN_BASE", config.jigasiSipDomainBase.get() );
             }
             catch ( ComponentException ce )
             {
@@ -495,9 +527,9 @@ public class JigasiWrapper implements Module
 
     public boolean canBeUsed()
     {
-        final boolean hasUserID = config.jigasiUserId.get() != null && !config.jigasiUserId.get().isEmpty();
-        final boolean hasPassword = config.jigasiPassword.get() != null && !config.jigasiPassword.get().isEmpty();
-        final boolean hasServerAddress = config.jigasiServerAddress.get() != null && !config.jigasiServerAddress.get().isEmpty();
+        final boolean hasUserID = config.jigasiSipUserId.get() != null && !config.jigasiSipUserId.get().isEmpty();
+        final boolean hasPassword = config.jigasiSipPassword.get() != null && !config.jigasiSipPassword.get().isEmpty();
+        final boolean hasServerAddress = config.jigasiSipServerAddress.get() != null && !config.jigasiSipServerAddress.get().isEmpty();
         final boolean canBeUsed = hasUserID && hasPassword && hasServerAddress;
         if ( canBeUsed ) {
             Log.trace( "Configured with user ID, password and server address." );
@@ -511,5 +543,48 @@ public class JigasiWrapper implements Module
     public Map<String, String> getServlets()
     {
         return null;
+    }
+
+    /**
+     * Attemt to create an XMPP user that will represent the SIP contact that is pulled into a Meet.
+     */
+    private static void ensureJigasiUser()
+    {
+        final OFMeetConfig config = new OFMeetConfig();
+
+        final String userId = config.getJigasiXmppUserId().get();
+
+        // Ensure that the user exists.
+        final UserManager userManager = XMPPServer.getInstance().getUserManager();
+        if ( !userManager.isRegisteredUser( userId ) )
+        {
+            Log.info( "No pre-existing jigasi user '{}' detected. Generating one.", userId );
+
+            if ( UserManager.getUserProvider().isReadOnly() ) {
+                Log.info( "The user provider on this system is read only. Cannot create a Jigasi user account." );
+                return;
+            }
+
+            String password = config.getJigasiXmppPassword().get();
+            if ( password == null || password.isEmpty() )
+            {
+                password = StringUtils.randomString( 40 );
+            }
+
+            try
+            {
+                userManager.createUser(
+                    userId,
+                    password,
+                    "Jigasi User (generated)",
+                    null
+                );
+                config.getJigasiXmppPassword().set( password );
+            }
+            catch ( Exception e )
+            {
+                Log.error( "Unable to provision a jigasi user.", e );
+            }
+        }
     }
 }

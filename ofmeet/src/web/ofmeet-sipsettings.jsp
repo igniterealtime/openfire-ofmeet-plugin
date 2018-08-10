@@ -20,6 +20,9 @@
 <%@ page import="org.jivesoftware.util.StringUtils" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="org.jivesoftware.openfire.user.UserManager" %>
+<%@ page import="org.jivesoftware.util.JiveGlobals" %>
+<%@ page import="org.jivesoftware.openfire.auth.AuthFactory" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
@@ -43,23 +46,29 @@
 			errors.put( "csrf", "CSRF Failure!" );
 		}
 
-        final String jigasiServerAddress = request.getParameter( "jigasiServerAddress" );
-        final String jigasiDomainBase = request.getParameter( "jigasiDomainBase" );
-        final String jigasiPassword = request.getParameter( "jigasiPassword" );
-        final String jigasiUserId = request.getParameter( "jigasiUserId" );
+        final String jigasiSipServerAddress = request.getParameter( "jigasiSipServerAddress" );
+        final String jigasiSipDomainBase = request.getParameter( "jigasiSipDomainBase" );
+        final String jigasiSipPassword = request.getParameter( "jigasiSipPassword" );
+        final String jigasiSipUserId = request.getParameter( "jigasiSipUserId" );
+        final String jigasiXmppPassword = request.getParameter( "jigasiXmppPassword" );
+        final String jigasiXmppUserId = request.getParameter( "jigasiXmppUserId" );
 
         if ( errors.isEmpty() )
 		{
-		    ofmeetConfig.jigasiServerAddress.set( jigasiServerAddress );
-		    ofmeetConfig.jigasiDomainBase.set( jigasiDomainBase );
-		    ofmeetConfig.jigasiPassword.set( jigasiPassword );
-		    ofmeetConfig.jigasiUserId.set( jigasiUserId );
+		    ofmeetConfig.jigasiSipServerAddress.set( jigasiSipServerAddress );
+		    ofmeetConfig.jigasiSipDomainBase.set( jigasiSipDomainBase );
+		    ofmeetConfig.jigasiSipPassword.set( jigasiSipPassword );
+		    ofmeetConfig.jigasiSipUserId.set( jigasiSipUserId );
+            ofmeetConfig.jigasiXmppPassword.set( jigasiXmppPassword );
+            ofmeetConfig.jigasiXmppUserId.set( jigasiXmppUserId );
 
 		    // Only reload everything if something changed.
-		    if ( ofmeetConfig.jigasiServerAddress.wasChanged()
-              || ofmeetConfig.jigasiDomainBase.wasChanged()
-              || ofmeetConfig.jigasiPassword.wasChanged()
-              || ofmeetConfig.jigasiUserId.wasChanged() )
+		    if ( ofmeetConfig.jigasiSipServerAddress.wasChanged()
+              || ofmeetConfig.jigasiSipDomainBase.wasChanged()
+              || ofmeetConfig.jigasiSipPassword.wasChanged()
+              || ofmeetConfig.jigasiSipUserId.wasChanged()
+              || ofmeetConfig.jigasiXmppUserId.wasChanged()
+              || ofmeetConfig.jigasiXmppPassword.wasChanged() )
             {
                 container.populateJitsiSystemPropertiesWithJivePropertyValues();
             }
@@ -68,11 +77,25 @@
 		}
 	}
 
+	// Check if the XMPP account can be used to log in.
+	boolean xmppAccountVerified = true;
+    try
+    {
+        AuthFactory.getAuthProvider().authenticate( ofmeetConfig.getJigasiXmppUserId().get(), ofmeetConfig.getJigasiXmppPassword().get() );
+    }
+    catch ( Exception e )
+    {
+        xmppAccountVerified = false;
+    }
+
     final String csrf = StringUtils.randomString( 15 );
 	CookieUtils.setCookie( request, response, "csrf", csrf, -1 );
 
 	pageContext.setAttribute( "csrf", csrf );
 	pageContext.setAttribute( "errors", errors );
+	pageContext.setAttribute( "userProviderReadOnly", UserManager.getUserProvider().isReadOnly() );
+	pageContext.setAttribute( "allowAnonymousClientAuth", JiveGlobals.getBooleanProperty( "xmpp.auth.anonymous" ) );
+	pageContext.setAttribute( "xmppAccountVerified", xmppAccountVerified );
 %>
 <html>
 <head>
@@ -106,27 +129,65 @@
 
 <form action="ofmeet-sipsettings.jsp" method="post">
 
-    <fmt:message key="sipsettings.account.title" var="boxtitleAccount"/>
+    <fmt:message key="sipsettings.sip.account.title" var="boxtitleAccount"/>
     <admin:contentBox title="${boxtitleAccount}">
         <p>
-            <fmt:message key="sipsettings.account.description"/>
+            <fmt:message key="sipsettings.sip.account.description"/>
         </p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
             <tr>
-                <td width="200"><label for="jigasiUserId"><fmt:message key="sipsettings.account.user-id"/>:</label></td>
-                <td><input type="text" size="60" maxlength="100" name="jigasiUserId" id="jigasiUserId" value="${ofmeetConfig.jigasiUserId.get() == null ? '' : ofmeetConfig.jigasiUserId.get()}"></td>
+                <td width="200"><label for="jigasiSipUserId"><fmt:message key="sipsettings.sip.account.user-id"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiSipUserId" id="jigasiSipUserId" value="${ofmeetConfig.jigasiSipUserId.get() == null ? '' : ofmeetConfig.jigasiSipUserId.get()}"></td>
             </tr>
             <tr>
-                <td width="200"><label for="jigasiPassword"><fmt:message key="sipsettings.account.password"/>:</label></td>
-                <td><input type="password" size="60" maxlength="100" name="jigasiPassword" id="jigasiPassword" value="${ofmeetConfig.jigasiPassword.get() == null ? '' : ofmeetConfig.jigasiPassword.get()}"></td>
+                <td width="200"><label for="jigasiSipPassword"><fmt:message key="sipsettings.sip.account.password"/>:</label></td>
+                <td><input type="password" size="60" maxlength="100" name="jigasiSipPassword" id="jigasiSipPassword" value="${ofmeetConfig.jigasiSipPassword.get() == null ? '' : ofmeetConfig.jigasiSipPassword.get()}"></td>
             </tr>
             <tr>
-                <td width="200"><label for="jigasiServerAddress"><fmt:message key="sipsettings.account.server-address"/>:</label></td>
-                <td><input type="text" size="60" maxlength="100" name="jigasiServerAddress" id="jigasiServerAddress" value="${ofmeetConfig.jigasiServerAddress.get() == null ? '' : ofmeetConfig.jigasiServerAddress.get()}"></td>
+                <td width="200"><label for="jigasiSipServerAddress"><fmt:message key="sipsettings.sip.account.server-address"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiSipServerAddress" id="jigasiSipServerAddress" value="${ofmeetConfig.jigasiSipServerAddress.get() == null ? '' : ofmeetConfig.jigasiSipServerAddress.get()}"></td>
             </tr>
             <tr>
-                <td width="200"><label for="jigasiDomainBase"><fmt:message key="sipsettings.account.domain-base"/>:</label></td>
-                <td><input type="text" size="60" maxlength="100" name="jigasiDomainBase" id="jigasiDomainBase" value="${ofmeetConfig.jigasiDomainBase.get() == null ? '' : ofmeetConfig.jigasiDomainBase.get()}"></td>
+                <td width="200"><label for="jigasiSipDomainBase"><fmt:message key="sipsettings.sip.account.domain-base"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiSipDomainBase" id="jigasiSipDomainBase" value="${ofmeetConfig.jigasiSipDomainBase.get() == null ? '' : ofmeetConfig.jigasiSipDomainBase.get()}"></td>
+            </tr>
+        </table>
+    </admin:contentBox>
+
+    <fmt:message key="sipsettings.xmpp.account.title" var="boxtitleAccount"/>
+    <admin:contentBox title="${boxtitleAccount}">
+        <p>
+            <fmt:message key="sipsettings.xmpp.account.description"/>
+        </p>
+        <c:if test="${userProviderReadOnly}">
+            <p><em><fmt:message key="sipsettings.xmpp.account.readonly"/></em></p>
+        </c:if>
+
+        <c:choose>
+            <c:when test="${allowAnonymousClientAuth}">
+                <p><em><fmt:message key="sipsettings.xmpp.account.anonymous"/></em></p>
+            </c:when>
+            <c:otherwise>
+                <p><fmt:message key="sipsettings.xmpp.account.no-anonymous"/></p>
+            </c:otherwise>
+        </c:choose>
+
+        <c:choose>
+            <c:when test="${not empty ofmeetConfig.jigasiXmppUserId.get() and xmppAccountVerified }">
+                <admin:infoBox type="success"><fmt:message key="sipsettings.xmpp.account.verified" /></admin:infoBox>
+            </c:when>
+            <c:otherwise>
+                <admin:infoBox type="warning"><fmt:message key="sipsettings.xmpp.account.unverified" /></admin:infoBox>
+            </c:otherwise>
+        </c:choose>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="200"><label for="jigasiXmppUserId"><fmt:message key="sipsettings.xmpp.account.user-id"/>:</label></td>
+                <td><input type="text" size="60" maxlength="100" name="jigasiXmppUserId" id="jigasiXmppUserId" value="${ofmeetConfig.jigasiXmppUserId.get() == null ? '' : ofmeetConfig.jigasiXmppUserId.get()}"></td>
+            </tr>
+            <tr>
+                <td width="200"><label for="jigasiXmppPassword"><fmt:message key="sipsettings.xmpp.account.password"/>:</label></td>
+                <td><input type="password" size="60" maxlength="100" name="jigasiXmppPassword" id="jigasiXmppPassword" value="${ofmeetConfig.jigasiXmppPassword.get() == null ? '' : ofmeetConfig.jigasiXmppPassword.get()}"></td>
             </tr>
         </table>
     </admin:contentBox>

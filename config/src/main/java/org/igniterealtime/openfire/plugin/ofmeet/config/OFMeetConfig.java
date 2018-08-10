@@ -608,16 +608,21 @@ public class OFMeetConfig
         JiveGlobals.deleteProperty( "ofmeet.webrtcIceTcpDisable" );
     }
 
-    public final StringProperty jigasiPassword = new StringProperty( "ofmeet.jigasi.password", "" );
-    public StringProperty getJigasiPassword() { return jigasiPassword; }
+    public final StringProperty jigasiSipUserId = new StringProperty( "ofmeet.jigasi.sip.user-id", null );
+    public StringProperty getJigasiSipUserId() { return jigasiSipUserId; }
 
-    public final StringProperty jigasiServerAddress = new StringProperty( "ofmeet.jigasi.server-address", null );
-    public StringProperty getJigasiServerAddress() { return jigasiServerAddress; }
+    public final StringProperty jigasiSipPassword = new StringProperty( "ofmeet.jigasi.sip.password", "" );
+    public StringProperty getJigasiSipPassword() { return jigasiSipPassword; }
 
-    public final StringProperty jigasiUserId = new StringProperty( "ofmeet.jigasi.user-id", null );
-    public StringProperty getJigasiUserId() { return jigasiUserId; }
+    public final StringProperty jigasiSipServerAddress = new StringProperty( "ofmeet.jigasi.sip.server-address", null );
+    public StringProperty getJigasiSipServerAddress() { return jigasiSipServerAddress; }
 
-    public final StringProperty jigasiDomainBase = new StringProperty( "ofmeet.jigasi.domain-base", null );
-    public StringProperty getJigasiDomainBase() { return jigasiDomainBase; }
+    public final StringProperty jigasiSipDomainBase = new StringProperty( "ofmeet.jigasi.sip.domain-base", null );
+    public StringProperty getJigasiSipDomainBase() { return jigasiSipDomainBase; }
 
+    public final StringProperty jigasiXmppUserId = new StringProperty( "ofmeet.jigasi.xmpp.user-id", "jigasi" );
+    public StringProperty getJigasiXmppUserId() { return jigasiXmppUserId; }
+
+    public final StringProperty jigasiXmppPassword = new StringProperty( "ofmeet.jigasi.xmpp.password", null );
+    public StringProperty getJigasiXmppPassword() { return jigasiXmppPassword; }
 }
