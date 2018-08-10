@@ -25,7 +25,7 @@
     <artifactId>ofmeet</artifactId>
 
     <name>Openfire Meetings</name>
-    <description>Provides high quality, scalable video conferences using Jitsi Meet and Videobridge.</description>
+    <description>Provides high quality, scalable video conferences.</description>
 
     <build>
         <sourceDirectory>src/java</sourceDirectory>
