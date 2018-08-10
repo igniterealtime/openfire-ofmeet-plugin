@@ -25,6 +25,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.container.Plugin;
+import org.jivesoftware.openfire.container.PluginListener;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.event.SessionEventDispatcher;
 import org.jivesoftware.openfire.event.SessionEventListener;
@@ -53,7 +54,7 @@ import java.util.*;
 /**
  * Bundles various Jitsi components into one, standalone Openfire plugin.
  */
-public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener
+public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventListener, PluginListener
 {
     private static final Logger Log = LoggerFactory.getLogger(OfMeetPlugin.class);
 
@@ -103,8 +104,16 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     public void initializePlugin(final PluginManager manager, final File pluginDirectory)
     {
-        this.pluginDirectory = pluginDirectory;
+        // Older versions of OFMeet required another plugin to be running, OFFocus. This is
+        // no longer needed or desirable.
+        if ( manager.isInstalled( "offocus" )) {
+            System.out.println( "OFFocus plugin detected. This version of The OFMeet plugin cannot run next to the OFFocus plugin (OFFocus is no longer needed). Please remove OFFocus and reinstall OFMeet!" );
+            throw new IllegalStateException( "OFFocus plugin detected. This version of The OFMeet plugin cannot run next to the OFFocus plugin (OFFocus is no longer needed). Please remove OFFocus and reinstall OFMeet!" );
+        }
+        manager.addPluginListener( this );
 
+
+        this.pluginDirectory = pluginDirectory;
         this.moduleManager.start( Thread.currentThread().getContextClassLoader(), manager, pluginDirectory );
 
         // Initialize all Jitsi software, which provided the video-conferencing functionality.
@@ -223,6 +232,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
 
         this.moduleManager.stop();
+
+        XMPPServer.getInstance().getPluginManager().removePluginListener( this );
     }
 
     private void loadAllModules()
@@ -403,4 +414,19 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             Log.info("OfMeet Plugin - closing skype session " + sipuri);
         }
     }
+
+    // This listener checks if the offocus plugin gets installed after ofmeet, and logs a warning if it does.
+    @Override
+    public void pluginCreated( final String pluginName, final Plugin plugin )
+    {
+        if ( "offocus".equalsIgnoreCase( pluginName ) )
+        {
+            System.out.println( "OFMeet plugin detected incompatible OFFocus plugin. Please remove OFFocus!" );
+            Log.error( "The OFMeet plugin detected that the OFFocus plugin is installed. This version of OFMeet no longer requires the OFFocus plugin. Running the OFFocus plugin and this version of OFMeet might lead to unpredictable behavior! OFFocus should be removed!" );
+        }
+    }
+
+    @Override
+    public void pluginDestroyed( final String pluginName, final Plugin plugin )
+    {}
 }
