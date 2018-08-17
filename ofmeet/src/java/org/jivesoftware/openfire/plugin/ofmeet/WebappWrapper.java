@@ -16,17 +16,11 @@
 
 package org.jivesoftware.openfire.plugin.ofmeet;
 
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.authentication.BasicAuthenticator;
-import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.http.HttpBindManager;
-import org.jivesoftware.openfire.plugin.ofmeet.jetty.OfMeetLoginService;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.PropertyEventListener;
 import org.slf4j.Logger;
@@ -152,29 +146,6 @@ public class WebappWrapper implements PropertyEventListener
             Log.error( "Unable to compose the webapp URL", e );
             return null;
         }
-    }
-
-    private static final SecurityHandler basicAuth( String realm) {
-
-        final OfMeetLoginService loginService = new OfMeetLoginService();
-        loginService.setName(realm);
-
-        final Constraint constraint = new Constraint();
-        constraint.setName( Constraint.__BASIC_AUTH );
-        constraint.setRoles( new String[] { "ofmeet" } );
-        constraint.setAuthenticate( true );
-
-        final ConstraintMapping constraintMapping = new ConstraintMapping();
-        constraintMapping.setConstraint( constraint );
-        constraintMapping.setPathSpec( "/*" );
-
-        final ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
-        securityHandler.setAuthenticator( new BasicAuthenticator() );
-        securityHandler.setRealmName( realm );
-        securityHandler.addConstraintMapping( constraintMapping );
-        securityHandler.setLoginService( loginService );
-
-        return securityHandler;
     }
 
     @Override
