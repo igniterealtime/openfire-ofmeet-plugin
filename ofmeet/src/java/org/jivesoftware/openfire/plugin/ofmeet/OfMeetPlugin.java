@@ -123,6 +123,15 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             System.setProperty( "net.java.sip.communicator.SC_HOME_DIR_NAME",      "classes" );
             System.setProperty( "net.java.sip.communicator.SC_CACHE_DIR_LOCATION", pluginDirectory.getAbsolutePath() );
             System.setProperty( "net.java.sip.communicator.SC_LOG_DIR_LOCATION",   pluginDirectory.getAbsolutePath() );
+
+            // Prevent initialisation of client-sided components that are part of the Jitsi code base (as it is based on Jitsi Communicator)
+            // but which have no reason for being enabled on a server. See https://github.com/igniterealtime/Openfire-Meetings/issues/21
+            System.setProperty( "org.jitsi.impl.neomedia.device.PulseAudioSystem.disabled", "true" );
+            System.setProperty( "org.jitsi.impl.neomedia.device.PortAudioSystem.disabled", "true" );
+            System.setProperty( "org.jitsi.impl.neomedia.device.Video4Linux2System.disabled", "true" );
+            System.setProperty( "org.jitsi.impl.neomedia.device.ImgStreamingSystem.disabled", "true" );
+            System.setProperty( "net.java.sip.communicator.service.media.DISABLE_AUDIO_SUPPORT", "true" );
+            System.setProperty( "net.java.sip.communicator.service.media.DISABLE_VIDEO_SUPPORT", "true" );
         }
         catch ( Exception ex )
         {
