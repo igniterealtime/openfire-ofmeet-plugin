@@ -97,10 +97,6 @@ public class JvbPluginWrapper implements Module
         Log.trace( "Successfully destroyed Jitsi Videobridge." );
     }
 
-    public Videobridge getVideobridge() {
-        return jitsiPlugin.getComponent().getVideobridge();
-    }
-
     /**
      * Jitsi takes most of its configuration through system properties. This method sets these
      * properties, using values defined in JiveGlobals.
