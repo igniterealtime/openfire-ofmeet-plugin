@@ -32,7 +32,7 @@
     <description>Instantiates a Jigasi SIP Gateway that allows regular SIP clients to interact with OFMeet.</description>
 
     <properties>
-        <jigasi.version>1.1-20180802.150420-10</jigasi.version>
+        <jigasi.version>1.1-20180806.165930-11</jigasi.version>
     </properties>
 
     <build>
