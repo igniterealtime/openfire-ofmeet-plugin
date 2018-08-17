@@ -21,6 +21,7 @@ import org.dom4j.QName;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.interceptor.PacketInterceptor;
 import org.jivesoftware.openfire.interceptor.PacketRejectedException;
+import org.jivesoftware.openfire.session.ClientSession;
 import org.jivesoftware.openfire.session.Session;
 import org.jivesoftware.util.JiveGlobals;
 import org.xmpp.packet.IQ;
@@ -55,6 +56,12 @@ public class BookmarkInterceptor implements PacketInterceptor
     {
         // Interested only in pre-processed, outgoing stanzas.
         if ( processed || incoming )
+        {
+            return;
+        }
+
+        // OF-1591 - I can't quite explain these. Maybe the session has been closed before the outgoing server promise timed out?
+        if ( session == null )
         {
             return;
         }
