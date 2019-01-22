@@ -97,7 +97,7 @@
             <dependency>
                 <groupId>org.jitsi</groupId>
                 <artifactId>jicofo</artifactId>
-                <version>1.1-20180809.210553-43</version>
+                <version>1.1-20190118.220443-57</version>
             </dependency>
             <dependency>
                 <groupId>org.jitsi</groupId>
