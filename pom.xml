@@ -108,7 +108,7 @@
             <dependency>
                 <groupId>org.jitsi</groupId>
                 <artifactId>jitsi-videobridge-openfire</artifactId>
-                <version>2.7-20190129.153604-1</version>
+                <version>2.7-20190212.092553-2</version>
             </dependency>
             <dependency>
                 <groupId>org.igniterealtime.openfire</groupId>
