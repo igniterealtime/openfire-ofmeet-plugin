@@ -107,7 +107,22 @@ public class OFMeetConfig
 
     public void resetSimulcast()
     {
-        JiveGlobals.deleteXMLProperty("org.jitsi.videobridge.ofmeet.simulcast" );
+        JiveGlobals.deleteXMLProperty( "org.jitsi.videobridge.ofmeet.simulcast" );
+    }
+
+    public void setDisableRtx( boolean disableRtx )
+    {
+        JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.disableRtx", Boolean.toString( disableRtx ) );
+    }
+
+    public boolean getDisableRtx()
+    {
+        return JiveGlobals.getBooleanProperty( "org.jitsi.videobridge.ofmeet.disableRtx", false );
+    }
+
+    public void resetDisableRtx()
+    {
+        JiveGlobals.deleteXMLProperty( "org.jitsi.videobridge.ofmeet.disableRtx" );
     }
 
     public void setAdaptiveSimulcast( boolean simulcast )

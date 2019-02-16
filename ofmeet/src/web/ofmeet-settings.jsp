@@ -44,6 +44,7 @@
         }
 
         final boolean securityenabled = ParamUtils.getBooleanParameter( request, "securityenabled" );
+        final boolean disableRtx = !ParamUtils.getBooleanParameter( request, "enableRtx" );
         final String authusername = request.getParameter( "authusername" );
         final String sippassword = request.getParameter( "sippassword" );
         final String server = request.getParameter( "server" );
@@ -133,6 +134,7 @@
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.allow.direct.sip", Boolean.toString( allowdirectsip ) );
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.sip.hq.voice", hqVoice );
 
+            ofmeetConfig.setDisableRtx( disableRtx );
             ofmeetConfig.setStartAudioOnly( startaudioonly );
             ofmeetConfig.setStartAudioMuted( startaudiomuted == null || startaudiomuted.isEmpty() ? null : Integer.parseInt( startaudiomuted ));
             ofmeetConfig.setStartVideoMuted( startvideomuted == null || startvideomuted.isEmpty() ? null : Integer.parseInt( startvideomuted ));
@@ -202,6 +204,12 @@
     <fmt:message key="config.page.configuration.ofmeet.title" var="boxtitleofmeet"/>
     <admin:contentBox title="${boxtitleofmeet}">
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td nowrap colspan="2">
+                    <input type="checkbox" name="enableRtx" ${ofmeetConfig.disableRtx ? "" : "checked"}>
+                    <fmt:message key="config.page.configuration.ofmeet.disableRtx.enabled_desc" />
+                </td>
+            </tr>
             <tr>
                 <td nowrap colspan="2">
                     <input type="checkbox" name="useipv6" ${admin:getBooleanProperty( "org.jitsi.videobridge.ofmeet.useipv6", false) ? "checked" : ""}>

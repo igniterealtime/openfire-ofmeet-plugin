@@ -226,7 +226,7 @@ public class ConfigServlet extends HttpServlet
             {
                 config.put( "globalConferenceId", globalConferenceId );
             }
-            config.put( "disableRtx", true );
+            config.put( "disableRtx", ofMeetConfig.getDisableRtx() );
             config.put( "bosh", getMostPreferredConnectionURL( request ) );
 
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
