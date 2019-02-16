@@ -95,12 +95,6 @@
         <dependencies>
             <!-- Third-party dependencies -->
             <dependency>
-                <!-- This overrides the transient libjitsi dependency, to force it to a version that includes https://github.com/jitsi/libjitsi/pull/461 -->
-                <groupId>org.jitsi</groupId>
-                <artifactId>libjitsi</artifactId>
-                <version>1.0-20190128.210332-374</version>
-            </dependency>
-            <dependency>
                 <groupId>org.jitsi</groupId>
                 <artifactId>jicofo</artifactId>
                 <version>1.1-20190204.161948-59</version>
