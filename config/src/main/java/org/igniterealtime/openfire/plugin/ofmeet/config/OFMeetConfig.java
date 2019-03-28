@@ -607,4 +607,34 @@ public class OFMeetConfig
     {
         JiveGlobals.deleteProperty( "ofmeet.webrtcIceTcpDisable" );
     }
+
+    public void setRandomAvatarURLPrefix( String randomAvatarURLPrefix )
+    {
+        JiveGlobals.setProperty( "ofmeet.random-avatar.url.prefix", randomAvatarURLPrefix );
+    }
+
+    public String getRandomAvatarURLPrefix()
+    {
+        return JiveGlobals.getProperty( "ofmeet.random-avatar.url.prefix", "https://abotars.jitsi.net/meeple/" );
+    }
+
+    public void resetRandomAvatarURLPrefix()
+    {
+        JiveGlobals.deleteProperty( "ofmeet.random-avatar.url.prefix" );
+    }
+
+    public void setRandomAvatarURLSuffix( String randomAvatarURLSuffix )
+    {
+        JiveGlobals.setProperty( "ofmeet.random-avatar.url.suffix", randomAvatarURLSuffix );
+    }
+
+    public String getRandomAvatarURLSuffix()
+    {
+        return JiveGlobals.getProperty( "ofmeet.random-avatar.url.suffix", "" );
+    }
+
+    public void resetRandomAvatarURLSuffix()
+    {
+        JiveGlobals.deleteProperty( "ofmeet.random-avatar.url.suffix" );
+    }
 }

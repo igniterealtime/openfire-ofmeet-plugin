@@ -138,6 +138,9 @@
             }
         }
 
+        final String randomAvatarPrefix = request.getParameter( "randomavatarprefix" );
+        final String randomAvatarSuffix = request.getParameter( "randomavatarsuffix" );
+
         if ( errors.isEmpty() )
 		{
             JiveGlobals.setProperty( "org.jitsi.videobridge.ofmeet.application.name", applicationName );
@@ -167,6 +170,9 @@
             ofmeetConfig.setBrandWatermarkLogoUrl( brandWatermarkLogoUrl );
 
             ofmeetConfig.setButtonsEnabled( buttonsEnabled );
+
+            ofmeetConfig.setRandomAvatarURLPrefix( randomAvatarPrefix );
+            ofmeetConfig.setRandomAvatarURLSuffix( randomAvatarSuffix != null ? randomAvatarSuffix : "" );
 
 			container.populateJitsiSystemPropertiesWithJivePropertyValues();
 
@@ -335,7 +341,7 @@
         </table>
 </admin:contentBox>
 
-    <fmt:message key="ofmeet.watermark.title" var="boxtitleWatermarks"/>
+<fmt:message key="ofmeet.watermark.title" var="boxtitleWatermarks"/>
     <admin:contentBox title="${boxtitleWatermarks}">
         <p><fmt:message key="ofmeet.watermark.description"/></p>
         <table cellpadding="3" cellspacing="0" border="0" width="100%">
@@ -391,6 +397,22 @@
         </table>
     </admin:contentBox>
 
+    <fmt:message key="ofmeet.random-avatar.title" var="boxtitleRandomAvatar"/>
+    <admin:contentBox title="${boxtitleRandomAvatar}">
+        <p>
+            <fmt:message key="ofmeet.random-avatar.description"/>
+        </p>
+        <table cellpadding="3" cellspacing="0" border="0" width="100%">
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.random-avatar.prefix"/>:</td>
+                <td><input type="text" size="60" maxlength="1000" name="randomavatarprefix" value="${ofmeetConfig.randomAvatarURLPrefix}"></td>
+            </tr>
+            <tr>
+                <td width="200"><fmt:message key="ofmeet.random-avatar.suffix"/>:</td>
+                <td><input type="text" size="60" maxlength="1000" name="randomavatarsuffix" value="${ofmeetConfig.randomAvatarURLSuffix}"></td>
+            </tr>
+        </table>
+    </admin:contentBox>
 
     <input type="hidden" name="csrf" value="${csrf}">
 

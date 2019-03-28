@@ -93,6 +93,10 @@ public class InterfaceConfigServlet extends HttpServlet
             final int remoteThumbnailRatioHeight = JiveGlobals.getIntProperty("org.jitsi.videobridge.ofmeet.remote.thumbnail.ratio.height",1 );
             config.put( "REMOTE_THUMBNAIL_RATIO", (double) remoteThumbnailRatioWidth / remoteThumbnailRatioHeight );
 
+            // Random avatar service
+            config.put( "RANDOM_AVATAR_URL_PREFIX", ofMeetConfig.getRandomAvatarURLPrefix() );
+            config.put( "RANDOM_AVATAR_URL_SUFFIX", ofMeetConfig.getRandomAvatarURLSuffix() );
+
             // Add response headers that instruct not to cache this data.
             response.setHeader( "Expires",       "Sat, 6 May 1995 12:00:00 GMT" );
             response.setHeader( "Cache-Control", "no-store, no-cache, must-revalidate" );
