@@ -3,6 +3,8 @@
 Openfire Meetings project
 =========================
 
+This project is currently **not maintained**. Try the [Pade project](https://github.com/igniterealtime/openfire-pade-plugin/releases) for more up-to-date versions of the ofmeet and offocus plugins. Development will resume at some point in the future with Jitsi-Videobridge version 2.x as soon as [this PR](https://github.com/jitsi/jitsi-sctp/pull/3) is merged to enable support for Windows.
+
 This project produces two Openfire plugins, offocus and ofmeet, that, combined, provide a WebRTC-based video conference solution for Openfire.
 
 The OFMeet project bundles various third-party products, notably:
