@@ -3,7 +3,7 @@
 Openfire Meetings project
 =========================
 
-This project is currently **not maintained**. Openfire Meetings has been absorbed into the Openfire Pade plugin. See [Openfire Pade Plugin](https://github.com/igniterealtime/openfire-pade-plugin/releases) for a replacement plugin. The openfire-ofmeet-plugin project will be archived soon.
+This project is currently **not maintained**. Openfire Meetings has been absorbed into the [Openfire Pade plugin](https://github.com/igniterealtime/openfire-pade-plugin). Visit  [project releases](https://github.com/igniterealtime/openfire-pade-plugin/releases) for a replacement plugin. This repository will be archived soon.
 
 This project produces two Openfire plugins, offocus and ofmeet, that, combined, provide a WebRTC-based video conference solution for Openfire.
 
