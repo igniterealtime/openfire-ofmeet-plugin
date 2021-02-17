@@ -107,6 +107,11 @@ public class ConfigServlet extends HttpServlet
             String iceServers = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.iceservers", "" );
             String xirsysUrl = JiveGlobals.getProperty( "ofmeet.xirsys.url", null );
 
+            String hostsDomain = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.hosts.domain", xmppDomain );
+            String hostsMuc = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.hosts.muc", "conference." + xmppDomain );
+            String hostsBridge = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.hosts.bridge", "jitsi-videobridge." + xmppDomain );
+            String hostsFocus = JiveGlobals.getProperty( "org.jitsi.videobridge.ofmeet.hosts.focus", "focus." + xmppDomain );
+
             if ( xirsysUrl != null )
             {
                 Log.info( "OFMeetConfig. found xirsys Url " + xirsysUrl );
@@ -123,10 +128,10 @@ public class ConfigServlet extends HttpServlet
             final JSONObject config = new JSONObject();
 
             final Map<String, String> hosts = new HashMap<>();
-            hosts.put( "domain", xmppDomain );
-            hosts.put( "muc", "conference." + xmppDomain );
-            hosts.put( "bridge", "jitsi-videobridge." + xmppDomain );
-            hosts.put( "focus", "focus." + xmppDomain );
+            hosts.put( "domain", hostsDomain );
+            hosts.put( "muc", hostsMuc );
+            hosts.put( "bridge", hostsBridge );
+            hosts.put( "focus", hostsFocus );
             config.put( "hosts", hosts );
 
             final Map<String, Object> p2p = new HashMap<>();
