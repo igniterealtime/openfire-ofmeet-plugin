@@ -318,6 +318,13 @@ public class ConfigServlet extends HttpServlet
         if ( !"http-bind".equalsIgnoreCase( preferredMechanism ) && (webSocketInCore || XMPPServer.getInstance().getPluginManager().getPlugin( "websocket" ) != null ) )
         {
             Log.debug( "[{}] Websocket functionality is available. Returning a websocket address.", request.getRemoteAddr() );
+            
+            //support reverse proxy
+            if ("https".equals(request.getHeader("X-Forwarded-Proto")))
+            {
+            		return new URI( "wss", null, request.getServerName(), 443, "/ws/", null, null);
+            }
+
             final String websocketScheme;
             if ( request.getScheme().endsWith( "s" ) )
             {
