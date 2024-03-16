@@ -10,7 +10,7 @@
     </parent>
     
     <groupId>org.igniterealtime.openfire</groupId>
-    <artifactId>pade</artifactId>
+    <artifactId>ofmeet</artifactId>
     <version>0.9.6-SNAPSHOT</version>	
     
     <name>ofmeet</name>
