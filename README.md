@@ -1,9 +1,11 @@
-[![Build Status](https://travis-ci.org/igniterealtime/Openfire-Meetings.svg?branch=master)](https://travis-ci.org/igniterealtime/Openfire-Meetings)
+s](https://github.com/igniterealtime/openfire-ofmeet-plugin/workflows/Java%20CI/badge.svg)](https://github.com/igniterealtime/openfire-ofmeet-plugin/actions)
 
 Openfire Meetings project
 =========================
 
-This project produces two Openfire plugins, offocus and ofmeet, that, combined, provide a WebRTC-based video conference soluhttps://github.com/igniterealtime/openfire-ofmeet-plugin/blob/master/README.mdtion for Openfire.
+This project produces a plugin that provides an online meeting solution for Openfire using Jitsi Meet.
+
+It implements [XEP-0483](https://xmpp.org/extensions/xep-0483.html) which defines an approach to request initiation of an online meeting via an HTTP server and receive a URL can be used to join and invite others to the meeting.
 
 The OFMeet project bundles various third-party products, notably:
 - the [Jitsi Videobridge](https://github.com/jitsi/jitsi-videobridge) project;
@@ -12,7 +14,7 @@ The OFMeet project bundles various third-party products, notably:
 
 Installation
 ------------
-Install the offocus and ofmeet plugins into your Openfire instance.
+Install the ofmeet plugins into your Openfire instance.
 
 Build instructions
 ------------------
@@ -21,7 +23,6 @@ This project is a Apache Maven project, and is build using the standard Maven in
 
     mvn clean package
 
-After a successful execution, the two plugins should be available in these locations:
+After a successful execution, the plugin should be available in this location:
 
-    offocus/target/offocus.jar
     ofmeet/target/ofmeet.jar
