@@ -1,4 +1,4 @@
-s](https://github.com/igniterealtime/openfire-ofmeet-plugin/workflows/Java%20CI/badge.svg)](https://github.com/igniterealtime/openfire-ofmeet-plugin/actions)
+[![Build Status](https://github.com/igniterealtime/openfire-ofmeet-plugin/workflows/Java%20CI/badge.svg)](https://github.com/igniterealtime/openfire-ofmeet-plugin/actions)
 
 Openfire Meetings project
 =========================
