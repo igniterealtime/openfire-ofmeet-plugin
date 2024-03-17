@@ -330,12 +330,39 @@
             <version>3.2.1.Final</version>
         </dependency> 
 		
-		<!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-util -->
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-jetty-client</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>	
+
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-io</artifactId>
+			<version>${jetty.version}</version>
+            <scope>provided</scope>			
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-http</artifactId>
+			<version>${jetty.version}</version>
+            <scope>provided</scope>			
+		</dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-jetty-server</artifactId>
+            <version>${jetty.version}</version>
+            <scope>provided</scope>				
+        </dependency>		
+
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
-			<version>9.4.35.v20201120</version>
-		</dependency>
+			<version>${jetty.version}</version>
+            <scope>provided</scope>			
+		</dependency>			
 
 		<dependency>
 			<groupId>com.yubico</groupId>

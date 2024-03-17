@@ -26,6 +26,12 @@ import org.eclipse.jetty.plus.annotation.ContainerInitializer;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.servlets.*;
 import org.eclipse.jetty.servlet.*;
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.websocket.servlet.*;
+import org.eclipse.jetty.websocket.server.*;
+import org.eclipse.jetty.websocket.server.config.*;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -79,9 +85,11 @@ import java.net.*;
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.zip.*;
+import java.util.concurrent.CountDownLatch;
 
 import org.igniterealtime.openfire.plugin.ofmeet.config.OFMeetConfig;
 import java.util.concurrent.*;
+import org.ifsoft.websockets.*;
 
 
 /**
@@ -101,7 +109,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private final OFMeetConfig config;		
 	private ComponentManager componentManager;
-    private FocusComponent focusComponent = null;	
+    private FocusComponent focusComponent = null;
+    private ServletContextHandler jvbWsContext = null;	
 
     public OfMeetPlugin()
     {
@@ -274,6 +283,17 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         publicWebApp.setWelcomeFiles(new String[]{"index.html"});
 		
         HttpBindManager.getInstance().addJettyHandler( publicWebApp );
+		
+        jvbWsContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        jvbWsContext.setContextPath("/colibri-ws");
+
+        JettyWebSocketServletContainerInitializer.configure(jvbWsContext, (servletContext, wsContainer) ->
+        {
+            wsContainer.setMaxTextMessageSize(65535);
+            wsContainer.addMapping("/*", new JvbSocketCreator());
+        });	
+
+		HttpBindManager.getInstance().addJettyHandler( jvbWsContext );
 
         Log.debug( "Initialized public web application", publicWebApp.toString() );
     }	
@@ -286,7 +306,10 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             try
             {
                 HttpBindManager.getInstance().removeJettyHandler( publicWebApp );
-                publicWebApp.destroy();				
+                publicWebApp.destroy();	
+
+				HttpBindManager.getInstance().removeJettyHandler(jvbWsContext);
+				jvbWsContext.destroy();				
             }
             finally
             {
@@ -374,6 +397,23 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
     }
 
+    public String getIpAddress()
+    {
+        String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
+        String ourIpAddress = JiveGlobals.getXMLProperty("network.interface");
+		
+		if (ourIpAddress == null) {
+			ourIpAddress = "127.0.0.1";
+			
+			try {
+				ourIpAddress = InetAddress.getByName(ourHostname).getHostAddress();
+			} catch (Exception e) {
+
+			}
+		}
+
+        return ourIpAddress;
+    }
 
     //-------------------------------------------------------
     //
@@ -559,4 +599,42 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
 
     }
+    //-------------------------------------------------------
+    //
+    //      WebSocket Handler
+    //
+    //-------------------------------------------------------
+	
+	public class JvbSocketCreator implements JettyWebSocketCreator
+	{		
+        @Override public Object createWebSocket(JettyServerUpgradeRequest req, JettyServerUpgradeResponse resp)
+        {
+			String ipaddr = JiveGlobals.getProperty( "ofmeet.videobridge.rest.host", OfMeetPlugin.self.getIpAddress());	
+            String jvbPort = JiveGlobals.getProperty( "ofmeet.websockets.plainport", "8180");
+
+            HttpServletRequest request = req.getHttpServletRequest();
+            String path = request.getRequestURI();
+            String query = request.getQueryString();
+            List<String> protocols = new ArrayList<String>();
+
+            for (String subprotocol : req.getSubProtocols())
+            {
+                Log.debug("WSocketCreator found protocol " + subprotocol);
+                resp.setAcceptedSubProtocol(subprotocol);
+                protocols.add(subprotocol);
+            }
+
+            if (query != null) path += "?" + query;
+
+            Log.debug("JvbSocketCreator " + path + " " + query);
+            String url = "ws://" + ipaddr + ":" + jvbPort + path;
+
+            ProxyWebSocket socket = null;
+            ProxyConnection proxyConnection = new ProxyConnection(URI.create(url), protocols, 10000);
+
+            socket = new ProxyWebSocket();
+            socket.setProxyConnection(proxyConnection);
+            return socket;
+        }		
+	}	
 }

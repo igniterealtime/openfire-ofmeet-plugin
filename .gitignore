@@ -4,7 +4,6 @@ work/
 *.cmd
 
 # ignore copied jitsi meet
-classes/jitsi-meet
 classes/docs
 
 # Ignore Intellij Idea project files
