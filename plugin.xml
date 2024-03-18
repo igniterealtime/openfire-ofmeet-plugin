@@ -10,5 +10,16 @@
     <minServerVersion>4.8.0</minServerVersion>
     <minJavaVersion>1.8</minJavaVersion>
     <adminconsole>
+        <tab id="sidebar-media-services">  	
+			<item id="ofmeet-summary"             name="${config.page.summary.title}"        description="${config.page.summary.description}"             url="ofmeet-summary.jsp"/>
+			<item id="ofmeet-settings"            name="${config.page.settings.title}"       description="${config.page.settings.description}"            url="ofmeet-settings.jsp"/>
+			<item id="jitsi-videobridge-settings" name="${plugin.sidebar.networking.title}"  description="${plugin.sidebar.networking.title.description}" url="jitsi-videobridge.jsp"/>               
+        </tab>	
+        <tab id="tab-webclients" name="${admin.sidebar.webclients.name}" description="${admin.sidebar.webclients.description}" url="ofmeet-uisettings.jsp">
+            <sidebar id="tab-ofmeet" name="${plugin.title}" description="${plugin.description}">
+                <item id="ofmeet-uisettings"          name="${config.page.uisettings.title}"     description="${config.page.uisettings.description}"          url="ofmeet-uisettings.jsp"/>
+				<item id="ofmeet-planner"             name="${config.page.planner.title}"        description="${config.page.planner.description}"             url="ofmeet-planner.jsp"/>				
+            </sidebar>
+        </tab>		
     </adminconsole>    
 </plugin>

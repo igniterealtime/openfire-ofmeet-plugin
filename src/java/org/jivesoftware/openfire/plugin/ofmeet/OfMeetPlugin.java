@@ -30,8 +30,6 @@ import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerI
 import org.eclipse.jetty.websocket.servlet.*;
 import org.eclipse.jetty.websocket.server.*;
 import org.eclipse.jetty.websocket.server.config.*;
-import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -102,6 +100,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
 
     private PluginManager manager;
     public File pluginDirectory;
+    public boolean restartNeeded = false;	
 
     private WebAppContext publicWebApp;
     private JitsiJvbWrapper jitsiJvbWrapper;
@@ -397,6 +396,44 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         }
     }
 
+    public URL getWebappURL()
+    {
+        final String override = JiveGlobals.getProperty( "ofmeet.webapp.url.override" );
+        if ( override != null && !override.trim().isEmpty() )
+        {
+            try
+            {
+                return new URL( override );
+            }
+            catch ( MalformedURLException e )
+            {
+                Log.warn( "An override for the webapp address is defined in 'ofmeet.webapp.url.override', but its value is not a valid URL.", e );
+            }
+        }
+        try
+        {
+            final String protocol = "https"; // No point in providing the non-SSL protocol, as webRTC won't work there.
+            final String host = XMPPServer.getInstance().getServerInfo().getHostname();
+            final int port = Integer.parseInt(JiveGlobals.getProperty("httpbind.port.secure", "7443"));
+            final String path;
+            if ( publicWebApp != null )
+            {
+                path = publicWebApp.getContextPath();
+            }
+            else
+            {
+                path = new OFMeetConfig().getWebappContextPath();
+            }
+
+            return new URL( protocol, host, port, path );
+        }
+        catch ( MalformedURLException e )
+        {
+            Log.error( "Unable to compose the webapp URL", e );
+            return null;
+        }
+    }
+	
     public String getIpAddress()
     {
         String ourHostname = XMPPServer.getInstance().getServerInfo().getHostname();
