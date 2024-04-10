@@ -128,6 +128,7 @@
         "privateNotice": "Private message to {{recipient}}",
         "sendButton": "Send",
         "smileysPanel": "Emoji panel",
+        "systemDisplayName": "System",
         "tabs": {
             "chat": "Chat",
             "polls": "Polls"
@@ -874,6 +875,9 @@
             "questionPlaceholder": "Ask a question",
             "removeOption": "Remove option",
             "send": "Send"
+        },
+        "errors": {
+            "notUniqueOption": "Options must be unique"
         },
         "notification": {
             "description": "Open polls tab to vote",

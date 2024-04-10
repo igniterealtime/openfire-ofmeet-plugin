@@ -5,6 +5,23 @@
  * https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-configuration
  */
 
+var subdir = '<!--# echo var="subdir" default="" -->';
+var subdomain = '<!--# echo var="subdomain" default="" -->';
+
+if (subdomain) {
+    subdomain = subdomain.substr(0, subdomain.length - 1).split('.')
+        .join('_')
+        .toLowerCase() + '.';
+}
+
+// In case of no ssi provided by the webserver, use empty strings
+if (subdir.startsWith('<!--')) {
+    subdir = '';
+}
+if (subdomain.startsWith('<!--')) {
+    subdomain = '';
+}
+
 var enableJaaS = false;
 
 var config = {
@@ -13,7 +30,7 @@ var config = {
 
     hosts: {
         // XMPP domain.
-        domain: 'localhost',
+        domain: 'jitsi-meet.example.com',
 
         // When using authentication, domain for guest users.
         // anonymousdomain: 'guest.example.com',
@@ -25,14 +42,14 @@ var config = {
         // focus: 'focus.jitsi-meet.example.com',
 
         // XMPP MUC domain. FIXME: use XEP-0030 to discover it.
-        muc: 'conference.localhost',
+        muc: 'conference.' + subdomain + 'jitsi-meet.example.com',
     },
 
     // BOSH URL. FIXME: use XEP-0156 to discover it.
-    bosh: 'https://localhost:7443/http-bind/',
+    bosh: 'https://jitsi-meet.example.com/' + subdir + 'http-bind',
 
     // Websocket URL (XMPP)
-    //websocket: 'wss://localhost:7443/ws/',
+    // websocket: 'wss://jitsi-meet.example.com/' + subdir + 'xmpp-websocket',
 
     // Whether BOSH should be preferred over WebSocket if both are configured.
     // preferBosh: false,
@@ -40,8 +57,12 @@ var config = {
     // The real JID of focus participant - can be overridden here
     // Do not change username - FIXME: Make focus username configurable
     // https://github.com/jitsi/jitsi-meet/issues/7376
-    focusUserJid: 'focus@localhost',	
-	
+    // focusUserJid: 'focus@auth.jitsi-meet.example.com',
+
+    // Option to send conference requests to jicofo over http (requires nginx rule for it)
+    // conferenceRequestUrl:
+    //   'https://<!--# echo var="http_host" default="jitsi-meet.example.com" -->/' + subdir + 'conference-request/v1',
+
     // Options related to the bridge (colibri) data channel
     bridgeChannel: {
         // If the backend advertises multiple colibri websockets, this options allows
@@ -1085,12 +1106,11 @@ var config = {
 
     // Information about the jitsi-meet instance we are connecting to, including
     // the user region as seen by the server.
-	
-    deploymentInfo: {
-         shard: "shard1",
-         region: "us-west-1",
-         userRegion: "asia",
-    },
+    // deploymentInfo: {
+    //     shard: "shard1",
+    //     region: "europe",
+    //     userRegion: "asia",
+    // },
 
     // Array<string> of disabled sounds.
     // Possible values:
