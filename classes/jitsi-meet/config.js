@@ -88,11 +88,8 @@ var config = {
         // issues related to insertable streams.
         // disableE2EE: false,
 
-        // Enables supports for AV1 codec.
-        // enableAv1Support: false,
-
-        // Enables XMPP WebSocket (as opposed to BOSH) for the given amount of users.
-        // mobileXmppWsThreshold: 10, // enable XMPP WebSockets on mobile for 10% of the users
+        // Enables the use of the codec selection API supported by the browsers .
+        // enableCodecSelectionAPI: false,
 
         // P2P test mode disables automatic switching to P2P when there are 2
         // participants in the conference.
@@ -123,6 +120,9 @@ var config = {
 
     // Disables polls feature.
     // disablePolls: false,
+
+    // Disables demote button from self-view
+    // disableSelfDemote: false,
 
     // Disables self-view tile. (hides it from tile view and from filmstrip)
     // disableSelfView: false,
@@ -232,8 +232,25 @@ var config = {
     // Sets the preferred resolution (height) for local video. Defaults to 720.
     // resolution: 720,
 
+    // DEPRECATED. Please use raisedHands.disableRemoveRaisedHandOnFocus instead.
     // Specifies whether the raised hand will hide when someone becomes a dominant speaker or not
     // disableRemoveRaisedHandOnFocus: false,
+
+    // Specifies which raised hand related config should be set.
+    // raisedHands: {
+    //     // Specifies whether the raised hand can be lowered by moderator.
+    //     disableLowerHandByModerator: false,
+
+    //     // Specifies whether there is a notification before hiding the raised hand
+    //     // when someone becomes the dominant speaker.
+    //     disableLowerHandNotification: true,
+
+    //     // Specifies whether there is a notification when you are the next speaker in line.
+    //     disableNextSpeakerNotification: false,
+
+    //     // Specifies whether the raised hand will hide when someone becomes a dominant speaker or not.
+    //     disableRemoveRaisedHandOnFocus: false,
+    // },
 
     // speakerStats: {
     //     // Specifies whether the speaker stats is enable or not.
@@ -461,6 +478,10 @@ var config = {
     //    // Provides a way to set the codec preference on desktop based endpoints.
     //    codecPreferenceOrder: [ 'VP9', 'VP8', 'H264' ],
     //
+    //    // Provides a way to set the codec for screenshare.
+    //    screenshareCodec: 'AV1',
+    //    mobileScreenshareCodec: 'VP8',
+    //
     //    // Codec specific settings for scalability modes and max bitrates.
     //    av1: {
     //      maxBitratesVideo: {
@@ -509,7 +530,7 @@ var config = {
     //      scalabilityModeEnabled: true,
     //      useSimulcast: false,
     //      useKSVC: true
-    //    }
+    //    },
     //
     //    DEPRECATED! Use `codec specific settings` instead.
     //    // Provides a way to configure the maximum bitrates that will be enforced on the simulcast streams for
@@ -848,6 +869,22 @@ var config = {
     //     autoHideWhileChatIsOpen: false,
     // },
 
+    // Overrides the buttons displayed in the main toolbar. Depending on the screen size the number of displayed
+    // buttons varies from 2 buttons to 8 buttons. Every array in the mainToolbarButtons array will replace the
+    // corresponding default buttons configuration matched by the number of buttons specified in the array. Arrays with
+    // more than 8 buttons or less then 2 buttons will be ignored. When there there isn't an override for a cerain
+    // configuration (for example when 3 buttons are displayed) the default jitsi-meet configuration will be used.
+    // The order of the buttons in the array is preserved.
+    // mainToolbarButtons: [
+    //     [ 'microphone', 'camera', 'desktop', 'chat', 'raisehand', 'reactions', 'participants-pane', 'tileview' ],
+    //     [ 'microphone', 'camera', 'desktop', 'chat', 'raisehand', 'participants-pane', 'tileview' ],
+    //     [ 'microphone', 'camera', 'desktop', 'chat', 'raisehand', 'participants-pane' ],
+    //     [ 'microphone', 'camera', 'desktop', 'chat', 'participants-pane' ],
+    //     [ 'microphone', 'camera', 'chat', 'participants-pane' ],
+    //     [ 'microphone', 'camera', 'chat' ],
+    //     [ 'microphone', 'camera' ]
+    // ],
+
     // Toolbar buttons which have their click/tap event exposed through the API on
     // `toolbarButtonClicked`. Passing a string for the button key will
     // prevent execution of the click/tap routine; passing an object with `key` and
@@ -1033,6 +1070,10 @@ var config = {
         //
         // Provides a way to set the codec preference on desktop based endpoints.
         // codecPreferenceOrder: [ 'VP9', 'VP8', 'H264 ],
+
+        // Provides a way to set the codec for screenshare.
+        // screenshareCodec: 'AV1',
+        // mobileScreenshareCodec: 'VP8',
 
         // How long we're going to wait, before going back to P2P after the 3rd
         // participant has left the conference (to filter out page reload).
@@ -1402,6 +1443,13 @@ var config = {
     */
     // dynamicBrandingUrl: '',
 
+    // A list of allowed URL domains for shared video.
+    //
+    // NOTE:
+    // '*' is allowed value and it will allow any URL to be used for shared video. We do not recommend using '*',
+    // use it at your own risk!
+    // sharedVideoAllowedURLDomains: [ ],
+
     // Options related to the participants pane.
     // participantsPane: {
     //     // Enables feature
@@ -1525,6 +1573,17 @@ var config = {
     // and will automatically redirect to the token service to get the token for the meeting.
     // tokenAuthUrlAutoRedirect: false
 
+    // You can put an array of values to target different entity types in the invite dialog.
+    // Valid values are "phone", "room", "sip", "user", "videosipgw" and "email"
+    // peopleSearchQueryTypes: ["user", "email"],
+    // Directory endpoint which is called for invite dialog autocomplete
+    // peopleSearchUrl: "https://myservice.com/api/people",
+    // Endpoint which is called to send invitation requests
+    // inviteServiceUrl: "https://myservice.com/api/invite",
+
+    // For external entities (e. g. email), the localStorage key holding the token value for directory authentication
+    // peopleSearchTokenLocation: "mytoken",
+
     // List of undocumented settings used in jitsi-meet
     /**
      _immediateReloadThreshold
@@ -1541,8 +1600,6 @@ var config = {
      iAmRecorder
      iAmSipGateway
      microsoftApiApplicationClientID
-     peopleSearchQueryTypes
-     peopleSearchUrl
      requireDisplayName
      */
 
@@ -1723,8 +1780,6 @@ var config = {
     //     tileTime: 5000,
     //     // Limit results by rating: g, pg, pg-13, r. Default value: g.
     //     rating: 'pg',
-    //     // The proxy server url for giphy requests in the web app.
-    //     proxyUrl: 'https://giphy-proxy.example.com',
     // },
 
     // Logging
@@ -1754,7 +1809,7 @@ var config = {
     //     // to control the performance.
     //     userLimit: 25,
     //     // The url for more info about the whiteboard and its usage limitations.
-    //     limitUrl: 'https://example.com/blog/whiteboard-limits,
+    //     limitUrl: 'https://example.com/blog/whiteboard-limits',
     // },
 
     // The watchRTC initialize config params as described :
@@ -1790,6 +1845,9 @@ var config = {
     //         collectionInterval?: number;
     //         logGetStats?: boolean;
     // },
+
+    // Hide login button on auth dialog, you may want to enable this if you are using JWT tokens to authenticate users
+    // hideLoginButton: true,
 };
 
 // Temporary backwards compatibility with old mobile clients.

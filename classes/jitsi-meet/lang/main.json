@@ -264,6 +264,7 @@
         "Share": "Share",
         "Submit": "Submit",
         "WaitForHostMsg": "The conference has not yet started because no moderators have yet arrived. If you'd like to become a moderator please log-in. Otherwise, please wait.",
+        "WaitForHostNoAuthMsg": "The conference has not yet started because no moderators have yet arrived. Please wait.",
         "WaitingForHostButton": "Wait for moderator",
         "WaitingForHostTitle": "Waiting for a moderator...",
         "Yes": "Yes",
@@ -438,11 +439,14 @@
         "shareScreenWarningD2": "you need to stop audio sharing, start screen sharing and check the \"share audio\" option.",
         "shareScreenWarningH1": "If you want to share just your screen:",
         "shareScreenWarningTitle": "You need to stop audio sharing before sharing your screen",
-        "shareVideoLinkError": "Please provide a correct video link.",
+        "shareVideoConfirmPlay": "You’re about to open an external website. Do you want to continue?",
+        "shareVideoConfirmPlayTitle": "{{name}} has shared a video with you.",
+        "shareVideoLinkError": "Oops, this video cannot be played.",
+        "shareVideoLinkStopped": "The video from {{name}} was stopped.",
         "shareVideoTitle": "Share video",
         "shareYourScreen": "Share your screen",
         "shareYourScreenDisabled": "Screen sharing disabled.",
-        "sharedVideoDialogError": "Error: Invalid URL",
+        "sharedVideoDialogError": "Error: Invalid or forbidden URL",
         "sharedVideoLinkPlaceholder": "YouTube link or direct video link",
         "show": "Show",
         "start": "Start ",
@@ -785,6 +789,7 @@
         "newDeviceAction": "Use",
         "newDeviceAudioTitle": "New audio device detected",
         "newDeviceCameraTitle": "New camera detected",
+        "nextToSpeak": "You are the next in line to speak",
         "noiseSuppressionDesktopAudioDescription": "Noise suppression can't be enabled while sharing desktop audio, please disable it and try again.",
         "noiseSuppressionFailedTitle": "Failed to start noise suppression",
         "noiseSuppressionStereoDescription": "Stereo audio noise suppression is not currently supported.",
@@ -819,8 +824,11 @@
         "videoUnmuteBlockedDescription": "Camera unmute and desktop sharing operation have been temporarily blocked because of system limits.",
         "videoUnmuteBlockedTitle": "Camera unmute and desktop sharing blocked!",
         "viewLobby": "View lobby",
+        "viewParticipants": "View participants",
         "viewVisitors": "View visitors",
         "waitingParticipants": "{{waitingParticipants}} people",
+        "waitingVisitors": "Visitors waiting in queue: {{waitingVisitors}}",
+        "waitingVisitorsTitle": "The meeting is not live yet!",
         "whiteboardLimitDescription": "Please save your progress, as the user limit will soon be reached and the whiteboard will close.",
         "whiteboardLimitTitle": "Whiteboard usage"
     },
@@ -834,7 +842,10 @@
             "audioModeration": "Unmute themselves",
             "blockEveryoneMicCamera": "Block everyone's mic and camera",
             "breakoutRooms": "Breakout rooms",
+            "goLive": "Go live",
             "invite": "Invite Someone",
+            "lowerAllHands": "Lower all hands",
+            "lowerHand": "Lower the hand",
             "moreModerationActions": "More moderation options",
             "moreModerationControls": "More moderation controls",
             "moreParticipantOptions": "More participant options",
@@ -851,6 +862,7 @@
         "headings": {
             "lobby": "Lobby ({{count}})",
             "participantsList": "Meeting participants ({{count}})",
+            "visitorInQueue": " (waiting {{count}})",
             "visitorRequests": " (requests {{count}})",
             "visitors": "Visitors {{count}}",
             "waitingLobby": "Waiting in lobby ({{count}})"
@@ -864,10 +876,13 @@
     "pinnedParticipant": "The participant is pinned",
     "polls": {
         "answer": {
+            "edit": "Edit",
+            "send": "Send",
             "skip": "Skip",
             "submit": "Submit"
         },
         "by": "By {{ name }}",
+        "closeButton": "Close poll",
         "create": {
             "addOption": "Add option",
             "answerPlaceholder": "Option {{index}}",
@@ -877,6 +892,7 @@
             "pollQuestion": "Poll Question",
             "questionPlaceholder": "Ask a question",
             "removeOption": "Remove option",
+            "save": "Save",
             "send": "Send"
         },
         "errors": {
@@ -1080,6 +1096,7 @@
         "desktopShareWarning": "You need to restart the screen share for the new settings to take effect.",
         "devices": "Devices",
         "followMe": "Everyone follows me",
+        "followMeRecorder": "Recorder follows me",
         "framesPerSecond": "frames-per-second",
         "incomingMessage": "Incoming message",
         "language": "Language",
@@ -1243,6 +1260,7 @@
             "privateMessage": "Send private message",
             "profile": "Edit your profile",
             "raiseHand": "Raise your hand",
+            "react": "Message reactions",
             "reactions": "Reactions",
             "reactionsMenu": "Reactions menu",
             "recording": "Toggle recording",
@@ -1482,16 +1500,22 @@
     },
     "visitors": {
         "chatIndicator": "(visitor)",
+        "joinMeeting": {
+            "description": "You're currently an observer in this conference.",
+            "raiseHand": "Raise your hand",
+            "title": "Joining meeting",
+            "wishToSpeak": "If you wish to speak, please raise your hand below and wait for the moderator's approval."
+        },
         "labelTooltip": "Number of visitors: {{count}}",
         "notification": {
             "demoteDescription": "Sent here by {{actor}}, raise your hand to participate",
-            "description": "To participate raise your hand",
             "noMainParticipantsDescription": "A participant needs to start the meeting. Please try again in a bit.",
             "noMainParticipantsTitle": "This meeting hasn’t started yet.",
             "noVisitorLobby": "You cannot join while there is a lobby enabled for the meeting.",
             "notAllowedPromotion": "A participant needs to allow your request first.",
             "title": "You are a visitor in the meeting"
-        }
+        },
+        "waitingMessage": "You'll join the meeting as soon as it is live!"
     },
     "volumeSlider": "Volume slider",
     "welcomepage": {

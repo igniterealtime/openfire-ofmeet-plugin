@@ -83,6 +83,7 @@ import {
     setAudioAvailable,
     setAudioMuted,
     setAudioUnmutePermissions,
+    setInitialGUMPromise,
     setVideoAvailable,
     setVideoMuted,
     setVideoUnmutePermissions
@@ -110,6 +111,7 @@ import {
 import {
     getLocalParticipant,
     getNormalizedDisplayName,
+    getParticipantByIdOrUndefined,
     getVirtualScreenshareParticipantByOwnerId
 } from './react/features/base/participants/functions';
 import { updateSettings } from './react/features/base/settings/actions';
@@ -154,8 +156,7 @@ import {
 import { isModerationNotificationDisplayed } from './react/features/notifications/functions';
 import { mediaPermissionPromptVisibilityChanged } from './react/features/overlay/actions';
 import { suspendDetected } from './react/features/power-monitor/actions';
-import { initPrejoin } from './react/features/prejoin/actions';
-import { isPrejoinPageVisible } from './react/features/prejoin/functions';
+import { initPrejoin, isPrejoinPageVisible } from './react/features/prejoin/functions';
 import { disableReceiver, stopReceiver } from './react/features/remote-control/actions';
 import { setScreenAudioShareState } from './react/features/screen-share/actions.web';
 import { isScreenAudioShared } from './react/features/screen-share/functions';
@@ -591,7 +592,7 @@ export default {
         const handleInitialTracks = (options, tracks) => {
             let localTracks = tracks;
 
-            if (options.startWithAudioMuted || room?.isStartAudioMuted()) {
+            if (options.startWithAudioMuted) {
                 // Always add the track on Safari because of a known issue where audio playout doesn't happen
                 // if the user joins audio and video muted, i.e., if there is no local media capture.
                 if (browser.isWebKitBased()) {
@@ -600,58 +601,38 @@ export default {
                     localTracks = localTracks.filter(track => track.getType() !== MEDIA_TYPE.AUDIO);
                 }
             }
-            if (room?.isStartVideoMuted()) {
-                localTracks = localTracks.filter(track => track.getType() !== MEDIA_TYPE.VIDEO);
-            }
 
             return localTracks;
         };
-
-        if (isPrejoinPageVisible(state)) {
-            const { tryCreateLocalTracks, errors } = this.createInitialLocalTracks(initialOptions);
-            const localTracks = await tryCreateLocalTracks;
-
-            // Initialize device list a second time to ensure device labels get populated in case of an initial gUM
-            // acceptance; otherwise they may remain as empty strings.
-            this._initDeviceList(true);
-
-            if (isPrejoinPageVisible(state)) {
-                APP.store.dispatch(gumPending([ MEDIA_TYPE.AUDIO, MEDIA_TYPE.VIDEO ], IGUMPendingState.NONE));
-
-                return APP.store.dispatch(initPrejoin(localTracks, errors));
-            }
-
-            logger.debug('Prejoin screen no longer displayed at the time when tracks were created');
-
-            APP.store.dispatch(displayErrorsForCreateInitialLocalTracks(errors));
-
-            const tracks = handleInitialTracks(initialOptions, localTracks);
-
-            setGUMPendingStateOnFailedTracks(tracks, APP.store.dispatch);
-
-            return this._setLocalAudioVideoStreams(tracks);
-        }
-
+        const { dispatch, getState } = APP.store;
         const { tryCreateLocalTracks, errors } = this.createInitialLocalTracks(initialOptions);
 
-        return Promise.all([
-            tryCreateLocalTracks.then(tr => {
+        dispatch(setInitialGUMPromise(tryCreateLocalTracks.then(async tr => {
+            const tracks = handleInitialTracks(initialOptions, tr);
+
+            this._initDeviceList(true);
+
+            if (isPrejoinPageVisible(getState())) {
+                dispatch(gumPending([ MEDIA_TYPE.AUDIO, MEDIA_TYPE.VIDEO ], IGUMPendingState.NONE));
+                dispatch(setInitialGUMPromise());
+
+                // Note: Not sure if initPrejoin needs to be async. But let's wait for it just to be sure the
+                // tracks are added.
+                initPrejoin(tracks, errors, dispatch);
+            } else {
                 APP.store.dispatch(displayErrorsForCreateInitialLocalTracks(errors));
+                setGUMPendingStateOnFailedTracks(tracks, APP.store.dispatch);
+            }
 
-                return tr;
-            }).then(tr => {
-                this._initDeviceList(true);
+            return {
+                tracks,
+                errors
+            };
+        })));
 
-                const filteredTracks = handleInitialTracks(initialOptions, tr);
-
-                setGUMPendingStateOnFailedTracks(filteredTracks, APP.store.dispatch);
-
-                return filteredTracks;
-            }),
-            APP.store.dispatch(connect())
-        ]).then(([ tracks, _ ]) => {
-            this.startConference(tracks).catch(logger.error);
-        });
+        if (!isPrejoinPageVisible(getState())) {
+            dispatch(connect());
+        }
     },
 
     /**
@@ -705,11 +686,13 @@ export default {
 
     /**
      * Simulates toolbar button click for audio mute. Used by shortcuts and API.
+     *
      * @param {boolean} mute true for mute and false for unmute.
      * @param {boolean} [showUI] when set to false will not display any error
      * dialogs in case of media permissions error.
+     * @returns {Promise}
      */
-    muteAudio(mute, showUI = true) {
+    async muteAudio(mute, showUI = true) {
         const state = APP.store.getState();
 
         if (!mute
@@ -749,7 +732,8 @@ export default {
             };
 
             APP.store.dispatch(gumPending([ MEDIA_TYPE.AUDIO ], IGUMPendingState.PENDING_UNMUTE));
-            createLocalTracksF({ devices: [ 'audio' ] })
+
+            await createLocalTracksF({ devices: [ 'audio' ] })
                 .then(([ audioTrack ]) => audioTrack)
                 .catch(error => {
                     maybeShowErrorDialog(error);
@@ -1162,10 +1146,11 @@ export default {
             APP.store.dispatch(gumPending(mutedTrackTypes, IGUMPendingState.NONE));
         }
 
-        this._setLocalAudioVideoStreams(tracks);
         this._room = room; // FIXME do not use this
 
         APP.store.dispatch(_conferenceWillJoin(room));
+
+        this._setLocalAudioVideoStreams(tracks);
 
         sendLocalParticipant(APP.store, room);
 
@@ -1277,8 +1262,7 @@ export default {
                     return;
                 }
 
-                APP.store.dispatch(
-                replaceLocalTrack(oldTrack, newTrack, room))
+                APP.store.dispatch(replaceLocalTrack(oldTrack, newTrack, room))
                     .then(() => {
                         this.updateAudioIconEnabled();
                     })
@@ -1637,7 +1621,11 @@ export default {
 
         room.on(
             JitsiConferenceEvents.CONFERENCE_CREATED_TIMESTAMP,
-            conferenceTimestamp => APP.store.dispatch(conferenceTimestampChanged(conferenceTimestamp)));
+            conferenceTimestamp => {
+                APP.store.dispatch(conferenceTimestampChanged(conferenceTimestamp));
+                APP.API.notifyConferenceCreatedTimestamp(conferenceTimestamp);
+            }
+        );
 
         room.on(
             JitsiConferenceEvents.DISPLAY_NAME_CHANGED,
@@ -1672,6 +1660,18 @@ export default {
                 });
             }
         );
+
+        room.on(
+            JitsiConferenceEvents.SILENT_STATUS_CHANGED,
+            (id, isSilent) => {
+                APP.store.dispatch(participantUpdated({
+                    conference: room,
+                    id,
+                    isSilent
+                }));
+            }
+        );
+
         room.on(
             JitsiConferenceEvents.BOT_TYPE_CHANGED,
             (id, botType) => {
@@ -1776,12 +1776,17 @@ export default {
         room.addCommandListener(
             this.commands.defaults.AVATAR_URL,
             (data, from) => {
-                APP.store.dispatch(
-                    participantUpdated({
-                        conference: room,
-                        id: from,
-                        avatarURL: data.value
-                    }));
+                const participant = getParticipantByIdOrUndefined(APP.store, from);
+
+                // if already set from presence(jwt), skip the command processing
+                if (!participant?.avatarURL) {
+                    APP.store.dispatch(
+                        participantUpdated({
+                            conference: room,
+                            id: from,
+                            avatarURL: data.value
+                        }));
+                }
             });
 
         room.on(
