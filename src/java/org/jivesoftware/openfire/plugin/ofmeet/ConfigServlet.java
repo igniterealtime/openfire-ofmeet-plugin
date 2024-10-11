@@ -333,13 +333,16 @@ public class ConfigServlet extends HttpServlet
             }
             config.put( "disableRtx", ofMeetConfig.getDisableRtx() );
             config.put( "bosh", new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/http-bind/", null, null) );
-            if (websockets)
-            {
+            
+			if (websockets) {
                 config.put( "websocket", new URI( "https".equals(request.getScheme()) ? "wss" : "ws", null, request.getServerName(), request.getServerPort(), "/ws/", null, null) );
-                config.put( "websocketKeepAliveUrl", new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "/pade/keepalive/index.html", null, null) );
-				
+                config.put( "websocketKeepAliveUrl", new URI( request.getScheme(), null, request.getServerName(), request.getServerPort(), "./keepalive/index.html", null, null) );				
             }
-            //config.put( "openBridgeChannel", wsBridgeChannel ? "websocket" : "datachannel" );
+			
+			JSONObject bridgeChannel = new JSONObject();
+			bridgeChannel.put( "preferSctp", !wsBridgeChannel);				
+            config.put( "bridgeChannel", bridgeChannel );
+			
             config.put( "channelLastN", ofMeetConfig.getChannelLastN() );
             config.put( "adaptiveLastN", ofMeetConfig.getAdaptiveLastN() );
             config.put( "disableSimulcast", !ofMeetConfig.getSimulcast() );
