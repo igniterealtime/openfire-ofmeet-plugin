@@ -128,6 +128,9 @@ var config = {
     // Disables the reactions moderation feature.
     // disableReactionsModeration: false,
 
+    // Disables the reactions in chat feature.
+    // disableReactionsInChat: false,
+
     // Disables polls feature.
     // disablePolls: false,
 
@@ -502,6 +505,14 @@ var config = {
     //     // Enables automatic request of subtitles when transcriber is present in the meeting, uses the default
     //     // language that is set
     //     autoCaptionOnTranscribe: false,
+    //
+    //     // Disables everything related to closed captions - the tab in the chat area, the button in the menu,
+    //     // subtitles on stage and the "Show subtitles on stage" checkbox in the settings.
+    //     // Note: Starting transcriptions from the recording dialog will still work.
+    //     disableClosedCaptions: false,
+
+    //     // Whether to invite jigasi when backend transcriptions are enabled. By default, we invite it.
+    //     inviteJigasiOnBackendTranscribing: true,
     // },
 
     // Misc
@@ -831,8 +842,7 @@ var config = {
     // some other values in config.js to be enabled. Also, the "profile" button will
     // not display for users with a JWT.
     // Notes:
-    // - it's impossible to choose which buttons go in the "More actions" menu
-    // - it's impossible to control the placement of buttons
+    // - it's possible to reorder the buttons in the maintoolbar by changing the order of the mainToolbarButtons
     // - 'desktop' controls the "Share your screen" button
     // - if `toolbarButtons` is undefined, we fallback to enabling all buttons on the UI
     // toolbarButtons: [
@@ -1262,9 +1272,6 @@ var config = {
     // disableDeepLinking: false,
 
     // The deeplinking config.
-    // For information about the properties of
-    // deeplinking.[ios/android].dynamicLink check:
-    // https://firebase.google.com/docs/dynamic-links/create-manually
     // deeplinking: {
     //
     //     // The desktop deeplinking config, disabled by default.
@@ -1293,13 +1300,6 @@ var config = {
     //         appScheme: 'org.jitsi.meet',
     //         // Custom URL for downloading ios mobile app.
     //         downloadLink: 'https://itunes.apple.com/us/app/jitsi-meet/id1165103905',
-    //         dynamicLink: {
-    //             apn: 'org.jitsi.meet',
-    //             appCode: 'w2atb',
-    //             customDomain: undefined,
-    //             ibi: 'com.atlassian.JitsiMeet.ios',
-    //             isi: '1165103905'
-    //         }
     //     },
 
     //     // The android deeplinking config.
@@ -1312,13 +1312,6 @@ var config = {
     //         // Android app package name.
     //         appPackage: 'org.jitsi.meet',
     //         fDroidUrl: 'https://f-droid.org/en/packages/org.jitsi.meet/',
-    //         dynamicLink: {
-    //             apn: 'org.jitsi.meet',
-    //             appCode: 'w2atb',
-    //             customDomain: undefined,
-    //             ibi: 'com.atlassian.JitsiMeet.ios',
-    //             isi: '1165103905'
-    //         }
     //     }
     // },
 
@@ -1583,6 +1576,9 @@ var config = {
     // tokenAuthUrlAutoRedirect: false
     // An option to respect the context.tenant jwt field compared to the current tenant from the url
     // tokenRespectTenant: false,
+    // An option to get for user info (name, picture, email) in the token outside the user context.
+    // Can be used with Firebase tokens.
+    // tokenGetUserInfoOutOfContext: false,
 
     // You can put an array of values to target different entity types in the invite dialog.
     // Valid values are "phone", "room", "sip", "user", "videosipgw" and "email"
@@ -1890,6 +1886,8 @@ var config = {
     //     apiUrl: 'https://example.com',
     //     // Whether the file sharing service is enabled or not.
     //     enabled: true,
+    //     // Maximum file size limit (-1 value disables any file size limit check)
+    //     maxFileSize: 50,
     // },
 };
 
