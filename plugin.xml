@@ -6,9 +6,9 @@
     <description>${project.description}</description>
     <author>Ignite Realtime</author>
     <version>${project.version}</version>
-    <date>2024-09-30</date>
-    <minServerVersion>4.8.0</minServerVersion>
-    <minJavaVersion>1.8</minJavaVersion>
+    <date>2025-06-30</date>
+    <minServerVersion>5.0.0</minServerVersion>
+
     <adminconsole>
         <tab id="sidebar-media-services">  	
 			<item id="ofmeet-summary"             name="${config.page.summary.title}"        description="${config.page.summary.description}"             url="ofmeet-summary.jsp"/>

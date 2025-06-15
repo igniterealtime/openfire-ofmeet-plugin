@@ -20,16 +20,12 @@
 package org.jivesoftware.openfire.plugin.ofmeet;
 
 import org.dom4j.Element;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.plus.annotation.ContainerInitializer;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.servlets.*;
-import org.eclipse.jetty.servlet.*;
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
-import org.eclipse.jetty.websocket.servlet.*;
-import org.eclipse.jetty.websocket.server.*;
-import org.eclipse.jetty.websocket.server.config.*;
+import org.eclipse.jetty.ee8.webapp.WebAppContext;
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee8.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.ee8.websocket.servlet.*;
+import org.eclipse.jetty.ee8.websocket.server.*;
+import org.eclipse.jetty.ee8.websocket.server.config.*;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +38,6 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.openfire.muc.MUCEventListener;
-import org.jivesoftware.openfire.muc.MUCRole;
 import org.jivesoftware.openfire.muc.MUCRoom;
 import org.jivesoftware.openfire.muc.MUCEventDispatcher;
 import org.jivesoftware.openfire.cluster.ClusterEventListener;
@@ -151,10 +146,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         {			
 			final String domain = XMPPServer.getInstance().getServerInfo().getXMPPDomain();
 			MultiUserChatService mucService = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService("conference");	
-			MUCRoom controlRoom = mucService.getChatRoom(roomName, new JID("admin@" + domain));
+			JID jid = new JID("admin@" + domain);
+			MUCRoom controlRoom = mucService.getChatRoom(roomName, jid);
 			controlRoom.setPersistent(false);
 			controlRoom.setPublicRoom(true);
-			controlRoom.unlock(controlRoom.getRole());
+			controlRoom.unlock(controlRoom.getSelfRepresentation().getAffiliation());
 			mucService.syncChatRoom(controlRoom);	
         }
         catch ( Exception ex )
@@ -274,13 +270,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
         publicWebApp = new WebAppContext(null, pluginDirectory.getPath() + "/classes/jitsi-meet",  new OFMeetConfig().getWebappContextPath());
         publicWebApp.setClassLoader(this.getClass().getClassLoader());
-		
-        final List<ContainerInitializer> initializers = new ArrayList<>();
-        initializers.add(new ContainerInitializer(new JettyJasperInitializer(), null));
-        publicWebApp.setAttribute("org.eclipse.jetty.containerInitializers", initializers);
-        publicWebApp.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
-        publicWebApp.setWelcomeFiles(new String[]{"index.html"});
-		
+        publicWebApp.getMimeTypes().addMimeMapping("wasm", "application/wasm");
+				
         HttpBindManager.getInstance().addJettyHandler( publicWebApp );
 		
         jvbWsContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -521,13 +512,11 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     //
     //-------------------------------------------------------
 
-    @Override
     public void roomCreated(JID roomJID)
     {
 
     }
 
-    @Override
     public void roomDestroyed(JID roomJID)
     {
 				
@@ -575,6 +564,18 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     {
 
     }
+	
+    public void roomClearChatHistory(long roomID, JID roomJID) {
+
+    }
+
+    public void roomCreated(long roomID, JID roomJID) {
+
+    }
+	
+    public void roomDestroyed(long roomID, JID roomJID) {
+
+    }	
 	
     //-------------------------------------------------------
     //
