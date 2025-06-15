@@ -133,8 +133,8 @@ public class JitsiJicofoWrapper implements ProcessListener
             "        enabled = " + (JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", OSUtils.IS_WINDOWS) ? "false" : "true"),
             "    }",
             "    octo  {",
-            "        enabled = true", //(ClusterManager.isClusteringEnabled() ? "true" : "false"),
-            "        id = \"jvb-1234\"",  //(ClusterManager.isClusteringEnabled() ? JiveGlobals.getXMLProperty("ofmeet.octo_id", "1") : "1")
+            "        enabled = " + (ClusterManager.isClusteringEnabled() ? "true" : "false"),
+            "        id = " + (ClusterManager.isClusteringEnabled() ? JiveGlobals.getXMLProperty("ofmeet.octo_id", "1") : "1"),	
             "    }",
             "    bridge  {",
             "        selection-strategy = RegionBasedBridgeSelectionStrategy ",
