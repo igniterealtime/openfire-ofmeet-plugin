@@ -30,11 +30,11 @@ public class FeedbackServlet extends HttpServlet
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
-        String descriptionMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.description.default", "pade");
-        String placeholderTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.placeholder.default", "pade");
-        String submitTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.submit.default", "pade");
-        String successMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.success.default", "pade");
-        String errorMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.error.default", "pade");
+        String descriptionMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.description.default", "ofmeet");
+        String placeholderTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.placeholder.default", "ofmeet");
+        String submitTextDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.submit.default", "ofmeet");
+        String successMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.success.default", "ofmeet");
+        String errorMessageDefault = LocaleUtils.getLocalizedString("ofmeet.feedback.error.default", "ofmeet");
 
         String descriptionMessage = JiveGlobals.getProperty( "ofmeet.feedback.description", descriptionMessageDefault );
         String placeholderText    = JiveGlobals.getProperty( "ofmeet.feedback.placeholder", placeholderTextDefault );
