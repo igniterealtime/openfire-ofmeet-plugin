@@ -281,8 +281,6 @@ public class JitsiJvbWrapper implements ProcessListener
             props.setProperty( "org.jitsi.videobridge.octo.BIND_PORT", JiveGlobals.getProperty("org.jitsi.videobridge.ofmeet.octo.port", "4096"));
             props.setProperty( "org.jitsi.videobridge.REGION", "region" + JiveGlobals.getXMLProperty("ofmeet.octo_id", "1"));
 
-            props.setProperty( "org.jitsi.videobridge.TRUST_BWE", Boolean.toString( !JiveGlobals.getBooleanProperty( "ofmeet.jicofo.force.vp9", true)));
-
             Log.debug("sip-communicator.properties");
 
             for (Object key: props.keySet()) {
