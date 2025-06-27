@@ -140,11 +140,10 @@ public class ConfigServlet extends HttpServlet
             boolean ofmeetLiveStream = JiveGlobals.getBooleanProperty( "ofmeet.live.stream.enabled", false);  
 			boolean useNewBandwidthAllocationStrategy = JiveGlobals.getBooleanProperty( "ofmeet.use.new.bandwidth.allocation.strategy", true); 
             
-            boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);
+            boolean wsBridgeChannel = JiveGlobals.getBooleanProperty( "ofmeet.bridge.ws.channel", org.jitsi.util.OSUtils.IS_WINDOWS);	
 			
-			JSONArray codecPreferenceOrder = new JSONArray(JiveGlobals.getProperty( "ofmeet.codec.preference.order", "[ \"AV1\", \"VP9\", \"VP8\", \"H264\" ]"));
-			JSONArray mobileCodecPreferenceOrder = new JSONArray(JiveGlobals.getProperty( "ofmeet.codec.preference.order", "[ \"VP8\", \"H264\", \"VP9\", \"AV1\" ]"));
-			
+			JSONArray codecPreferenceOrder = new JSONArray(JiveGlobals.getProperty( "ofmeet.codec.preference.order", "[ \"AV1\", \"VP9\", \"H264\", \"VP8\" ]"));
+			JSONArray mobileCodecPreferenceOrder = new JSONArray(JiveGlobals.getProperty( "ofmeet.codec.preference.order", "[ \"AV1\", \"VP9\", \"H264\", \"VP8\" ]"));
 
             if ( xirsysUrl != null )
             {
