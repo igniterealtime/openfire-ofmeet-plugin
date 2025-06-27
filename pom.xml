@@ -11,7 +11,7 @@
     
     <groupId>org.igniterealtime.openfire</groupId>
     <artifactId>ofmeet</artifactId>
-    <version>0.9.7</version>	
+    <version>0.9.8-SNAPSHOT</version>	
     
     <name>Openfire Meetings</name>
     <description>HTTP Online meeting solution for Openfire using Jitsi Meet</description>
