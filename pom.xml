@@ -13,7 +13,7 @@
     <artifactId>ofmeet</artifactId>
     <version>0.9.7-SNAPSHOT</version>	
     
-    <name>ofmeet</name>
+    <name>Openfire Meetings</name>
     <description>HTTP Online meeting solution for Openfire using Jitsi Meet</description>
 
     <properties>

@@ -1,55 +1,52 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
+<!DOCTYPE html>
 <html>
+
 <head>
-    <title>Openfire Meetings Plugin Readme</title>
-    <style type="text/css">
-        BODY {
-            font-size: 100%;
-        }
-
-        BODY, TD, TH {
-            font-family: tahoma, verdana, arial, helvetica, sans-serif;
-            font-size: 0.8em;
-        }
-
-        H2 {
-            font-size: 10pt;
-            font-weight: bold;
-        }
-
-        A:hover {
-            text-decoration: none;
-        }
-
-        H1 {
-            font-family: tahoma, arial, helvetica, sans-serif;
-            font-size: 1.4em;
-            font-weight: bold;
-            border-bottom: 1px #ccc solid;
-            padding-bottom: 2px;
-        }
-
-        TT {
-            font-family: courier new;
-            font-weight: bold;
-            color: #060;
-        }
-
-        PRE {
-            font-family: courier new;
-            font-size: 100%;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Read Me</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
 </head>
-<body>
 
-<h1>
-    Openfire Meetings Plugin Readme
-</h1>
+<body class="stackedit">
+  <div class="stackedit__left">
+    <div class="stackedit__toc">
+      
+<ul>
+<li><a href="#openfire-meetings-project">Openfire Meetings project</a>
+<ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#build-instructions">Build instructions</a></li>
+</ul>
+</li>
+</ul>
 
-<div>
-<p>An <a href="http://www.igniterealtime.org/projects/openfire/">Openfire</a> plugin that provides high quality, scalable video
-conferences using Jitsi Videobridge.</p>
+    </div>
+  </div>
+  <div class="stackedit__right">
+    <div class="stackedit__html">
+      <p><a href="https://github.com/igniterealtime/openfire-ofmeet-plugin/actions"><img src="https://github.com/igniterealtime/openfire-ofmeet-plugin/workflows/Java%20CI/badge.svg" alt="Build Status"></a></p>
+<h1 id="openfire-meetings-project">Openfire Meetings project</h1>
+<p>This project produces a plugin that provides an online meeting solution for Openfire using Jitsi Meet.</p>
+<p>It implements <a href="https://xmpp.org/extensions/xep-0483.html">XEP-0483</a> which defines an approach to request initiation of an online meeting via an HTTP server and receive a URL can be used to join and invite others to the meeting.</p>
+<p>The OFMeet project bundles various third-party products, notably:</p>
+<ul>
+<li>the <a href="https://github.com/jitsi/jitsi-videobridge">Jitsi Videobridge</a> project;</li>
+<li>the <a href="https://github.com/jitsi/jicofo">Jitsi Conference Focus (jicofo)</a> project;</li>
+<li>the <a href="https://github.com/jitsi/jitsi-meet">Jitsi Meet</a> webclient.</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>Install the ofmeet plugins into your Openfire instance.</p>
+<h2 id="build-instructions">Build instructions</h2>
+<p>This project is a Apache Maven project, and is build using the standard Maven invocation:</p>
+<pre><code>mvn clean package
+</code></pre>
+<p>After a successful execution, the plugin should be available in this location:</p>
+<pre><code>ofmeet/target/ofmeet.jar
+</code></pre>
+
+    </div>
+  </div>
 </body>
+
 </html>
