@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <bouncycastle.version>1.70</bouncycastle.version>
+        <bouncycastle.version>1.78.1</bouncycastle.version>
     </properties>
 
     <build>
@@ -64,30 +64,7 @@
             <artifactId>xmppserver</artifactId>
             <version>${openfire.version}</version>
             <scope>provided</scope>
-        </dependency>	
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcmail-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-        </dependency>	
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpg-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-            <scope>provided</scope>			
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-            <scope>provided</scope>			
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
-            <scope>provided</scope>			
-        </dependency>		
+        </dependency>				
         <dependency>
             <groupId>javax.sip</groupId>
             <artifactId>jain-sip-ri</artifactId>
@@ -289,24 +266,7 @@
             <groupId>fr.brouillard.oss.security.xhub</groupId>
             <artifactId>xhub4j-servlet</artifactId>
             <version>1.1.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.lowagie</groupId>
-            <artifactId>itext</artifactId>
-            <!-- NB. Later versions are available at com.itextpdf:itextpdf but require code changes -->
-            <version>2.0.8</version>
-			<exclusions>
-				<exclusion>
-					<groupId>bouncycastle</groupId>
-					<artifactId>bcmail-jdk14</artifactId>			
-				</exclusion>
-				<exclusion>
-					<groupId>bouncycastle</groupId>
-					<artifactId>bcprov-jdk14</artifactId>				
-				</exclusion>				
-			</exclusions> 			
-        </dependency>  		       
+        </dependency>		       
 
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -325,14 +285,7 @@
 			<groupId>org.jitsi</groupId>
 			<artifactId>ice4j</artifactId>
 			<version>3.0-24-g34c2ce5</version>
-		</dependency>
-
-
-        <dependency>
-            <groupId>org.jboss.netty</groupId>
-            <artifactId>netty</artifactId>
-            <version>3.2.1.Final</version>
-        </dependency> 
+		</dependency> 
 		
 		<dependency>
 			<groupId>org.eclipse.jetty.ee8.websocket</groupId>
