@@ -15,18 +15,18 @@ async function deriveKeys(material) {
     // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveKey#HKDF
     // https://developer.mozilla.org/en-US/docs/Web/API/HkdfParams
     const encryptionKey = await crypto.subtle.deriveKey({
-        name: 'HKDF',
-        salt: textEncoder.encode('JFrameEncryptionKey'),
         hash: 'SHA-256',
-        info
+        info,
+        name: 'HKDF',
+        salt: textEncoder.encode('JFrameEncryptionKey')
     }, material, {
-        name: 'AES-GCM',
-        length: 128
+        length: 128,
+        name: 'AES-GCM'
     }, false, [ 'encrypt', 'decrypt' ]);
 
     return {
-        material,
-        encryptionKey
+        encryptionKey,
+        material
     };
 }
 
@@ -41,10 +41,10 @@ async function ratchet(material) {
 
     // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveBits
     return await crypto.subtle.deriveBits({
-        name: 'HKDF',
-        salt: textEncoder.encode('JFrameRatchetKey'),
         hash: 'SHA-256',
-        info: new ArrayBuffer()
+        info: new ArrayBuffer(),
+        name: 'HKDF',
+        salt: textEncoder.encode('JFrameRatchetKey')
     }, material, 256);
 }
 
@@ -81,8 +81,8 @@ const KEYRING_SIZE = 16;
 // For audio (where frame.type is not set) we do not encrypt the opus TOC byte:
 //   https://tools.ietf.org/html/rfc6716#section-3.1
 const UNENCRYPTED_BYTES = {
-    key: 10,
     delta: 3,
+    key: 10,
     undefined: 1 // frame.type is not set on audio
 };
 const ENCRYPTION_ALGORITHM = 'AES-GCM';
@@ -211,9 +211,9 @@ class Context {
             // ---------+-------------------------+-+---------+----
 
             return crypto.subtle.encrypt({
-                name: ENCRYPTION_ALGORITHM,
+                additionalData: new Uint8Array(encodedFrame.data, 0, frameHeader.byteLength),
                 iv,
-                additionalData: new Uint8Array(encodedFrame.data, 0, frameHeader.byteLength)
+                name: ENCRYPTION_ALGORITHM
             }, currentKey.encryptionKey, new Uint8Array(encodedFrame.data,
                 UNENCRYPTED_BYTES[encodedFrame.type]))
             .then(cipherText => {
@@ -309,9 +309,9 @@ class Context {
                     - (frameHeader.byteLength + ivLength + frameTrailer.byteLength);
 
             const plainText = await crypto.subtle.decrypt({
-                name: 'AES-GCM',
+                additionalData: new Uint8Array(encodedFrame.data, 0, frameHeader.byteLength),
                 iv,
-                additionalData: new Uint8Array(encodedFrame.data, 0, frameHeader.byteLength)
+                name: 'AES-GCM'
             },
                 encryptionKey,
                 new Uint8Array(encodedFrame.data, cipherTextStart, cipherTextLength));
