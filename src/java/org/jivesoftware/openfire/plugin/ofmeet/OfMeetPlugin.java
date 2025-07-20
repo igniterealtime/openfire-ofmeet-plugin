@@ -97,6 +97,7 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
     public File pluginDirectory;
     public boolean restartNeeded = false;	
 
+    private OfMeetIQHandler ofmeetIQHandler;
     private WebAppContext publicWebApp;
     private JitsiJvbWrapper jitsiJvbWrapper;
     private JitsiJicofoWrapper jitsiJicofoWrapper;
@@ -223,6 +224,12 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
         try
         {
             loadPublicWebApp();
+			
+            ofmeetIQHandler = new OfMeetIQHandler();
+            XMPPServer.getInstance().getIQRouter().addHandler(ofmeetIQHandler);
+			XMPPServer.getInstance().getIQDiscoInfoHandler().addServerFeature("urn:xmpp:http:online-meetings:initiate:0");				
+			XMPPServer.getInstance().getIQDiscoInfoHandler().addServerFeature("urn:xmpp:http:online-meetings#jitsi");			
+			
             SessionEventDispatcher.addListener(this);
             PropertyEventDispatcher.addListener(this);
             MUCEventDispatcher.addListener(this);
@@ -242,7 +249,8 @@ public class OfMeetPlugin implements Plugin, SessionEventListener, ClusterEventL
             PropertyEventDispatcher.removeListener( this );
             MUCEventDispatcher.removeListener(this);
 
-            unloadPublicWebApp();		
+            unloadPublicWebApp();	
+            XMPPServer.getInstance().getIQRouter().removeHandler(ofmeetIQHandler);			
         }
         catch ( Exception ex )
         {
