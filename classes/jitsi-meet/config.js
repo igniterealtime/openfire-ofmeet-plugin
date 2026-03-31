@@ -139,6 +139,9 @@ var config = {
     // Disables polls feature.
     // disablePolls: false,
 
+    // Disables chat feature entirely including notifications, sounds, and private messages.
+    // disableChat: false,
+
     // Disables demote button from self-view
     // disableSelfDemote: false,
 
@@ -147,6 +150,9 @@ var config = {
 
     // Disables self-view settings in UI
     // disableSelfViewSettings: false,
+
+    // Shows/hides the moderator setting for chat permissions.
+    // showChatPermissionsModeratorSetting: false,
 
     // screenshotCapture : {
     //      Enables the screensharing capture feature.
@@ -505,6 +511,15 @@ var config = {
     //     // ./src/react/features/transcribing/transcriber-langs.json.
     //     preferredLanguage: 'en-US',
 
+    // Allows extending the list of supported transcription languages.
+    // Useful for custom transcription backends (e.g. Vosk).
+    //
+    // Example:
+    // customLanguages: {
+    //     'hsb-DE': 'Upper Sorbian (Germany)',
+    //     'dsb-DE': 'Lower Sorbian (Germany)'
+    // },
+
     //     // Enables automatic turning on transcribing when recording is started
     //     autoTranscribeOnRecord: false,
 
@@ -517,9 +532,6 @@ var config = {
     //     // Note: Starting transcriptions from the recording dialog will still work.
     //     disableClosedCaptions: false,
 
-    //     // Whether to invite jigasi when backend transcriptions are enabled (asyncTranscription is true in metadata).
-    //     // By default, we invite it.
-    //     inviteJigasiOnBackendTranscribing: true,
     // },
 
     // Misc
@@ -632,21 +644,6 @@ var config = {
     //     long: 10000,
     //     extraLong: 60000,
     //     sticky: 0,
-    // },
-
-    // // Options for the recording limit notification.
-    // recordingLimit: {
-    //
-    //    // The recording limit in minutes. Note: This number appears in the notification text
-    //    // but doesn't enforce the actual recording time limit. This should be configured in
-    //    // jibri!
-    //    limit: 60,
-    //
-    //    // The name of the app with unlimited recordings.
-    //    appName: 'Unlimited recordings APP',
-    //
-    //    // The URL of the app with unlimited recordings.
-    //    appURL: 'https://unlimited.recordings.app.com/',
     // },
 
     // Disables or enables RTX (RFC 4588) (defaults to false).
@@ -805,7 +802,9 @@ var config = {
     //     // By setting preCallTestEnabled, you enable the pre-call test in the prejoin page.
     //     // ICE server credentials need to be provided over the preCallTestICEUrl
     //     preCallTestEnabled: false,
-    //     preCallTestICEUrl: ''
+    //     preCallTestICEUrl: '',
+    //     // Shows the hangup button in the lobby screen.
+    //     showHangUp: true,
     // },
 
     // When 'true', the user cannot edit the display name.
@@ -902,6 +901,8 @@ var config = {
     //     alwaysVisible: false,
     //     // Indicates whether the toolbar should still autohide when chat is open
     //     autoHideWhileChatIsOpen: false,
+    //     // Default background color for the main toolbar. Accepts any valid CSS color.
+    //     // backgroundColor: '#ffffff',
     // },
 
     // Overrides the buttons displayed in the main toolbar. Depending on the screen size the number of displayed
@@ -919,6 +920,14 @@ var config = {
     //     [ 'microphone', 'camera', 'chat' ],
     //     [ 'microphone', 'camera' ]
     // ],
+
+    // Enable reduced UI on web.
+    // reducedUIEnabled: true,
+
+    // Overrides the buttons displayed in the main toolbar for reduced UI.
+    // When there isn't an override for a certain configuration the default jitsi-meet configuration will be used.
+    // The order of the buttons in the array is preserved.
+    // reducedUImainToolbarButtons: [ 'microphone', 'camera' ],
 
     // Toolbar buttons which have their click/tap event exposed through the API on
     // `toolbarButtonClicked`. Passing a string for the button key will
@@ -1577,14 +1586,13 @@ var config = {
     //          - electron=true (when web is loaded in electron app)
     // If there is a logout service you can specify its URL with:
     // tokenLogoutUrl: 'https://myservice.com/logout'
-    // You can enable tokenAuthUrlAutoRedirect which will detect that you have logged in successfully before
-    // and will automatically redirect to the token service to get the token for the meeting.
-    // tokenAuthUrlAutoRedirect: false
     // An option to respect the context.tenant jwt field compared to the current tenant from the url
     // tokenRespectTenant: false,
     // An option to get for user info (name, picture, email) in the token outside the user context.
     // Can be used with Firebase tokens.
     // tokenGetUserInfoOutOfContext: false,
+    // An option to pass the token in the iframe API directly instead of using the redirect flow.
+    // tokenAuthInline: false,
 
     // You can put an array of values to target different entity types in the invite dialog.
     // Valid values are "phone", "room", "sip", "user", "videosipgw" and "email"
@@ -1605,6 +1613,10 @@ var config = {
     //         audio: true,
     //         video: true
     //     },
+    //     // Hides the visitor count for visitors.
+    //     // hideVisitorCountForVisitors: false,
+    //     // Whether to show the join meeting dialog when joining as a visitor.
+    //     // showJoinMeetingDialog: true,
     // },
     // The default type of desktop sharing sources that will be used in the electron app.
     // desktopSharingSources: ['screen', 'window'],
@@ -1851,6 +1863,10 @@ var config = {
     //     userLimit: 25,
     //     // The url for more info about the whiteboard and its usage limitations.
     //     limitUrl: 'https://example.com/blog/whiteboard-limits',
+
+    //     //Backend URL for storing whiteboard scenes and images
+    //     //This backend service handles scene persistence and file uploads
+    //     storageBackendUrl: 'https://excalidraw-s3-storage-backend.example.com',
     // },
 
     // The watchRTC initialize config params as described :

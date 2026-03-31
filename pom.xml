@@ -6,19 +6,19 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>org.igniterealtime.openfire</groupId>
-        <version>5.0.0</version>
+        <version>5.0.4</version>
     </parent>
     
     <groupId>org.igniterealtime.openfire</groupId>
     <artifactId>ofmeet</artifactId>
-    <version>0.9.10-SNAPSHOT</version>	
+    <version>0.9.11-SNAPSHOT</version>	
     
     <name>Openfire Meetings</name>
     <description>HTTP Online meeting solution for Openfire using Jitsi Meet</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <bouncycastle.version>1.78.1</bouncycastle.version>
+        <bouncycastle.version>1.83</bouncycastle.version>
     </properties>
 
     <build>
